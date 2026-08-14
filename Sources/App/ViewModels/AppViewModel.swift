@@ -14,6 +14,7 @@ final class AppViewModel: ObservableObject {
     @Published var dashboardSortMode: DashboardSortMode
     @Published var dashboardManualOrder: [UUID]
     @Published var trendWindow: TrendWindow = .week
+    @Published private(set) var codexEquivalentValueSnapshot: CodexEquivalentValueSnapshot = .empty
     @Published private(set) var launchAtLoginEnabled = false
     @Published private(set) var launchAtLoginErrorMessage: String?
 
@@ -32,6 +33,7 @@ final class AppViewModel: ObservableObject {
     private let snapshotMaxPerAccount = 5_000
     private let snapshotDuplicateWindow: TimeInterval = 45
     private var shortRetryTask: Task<Void, Never>?
+    private var codexValueScanTask: Task<CodexEquivalentValueSnapshot, Never>?
     private var shortRetryFailureCounts: [UUID: Int] = [:]
     private let shortRetryIntervalNanoseconds: UInt64 = 10_000_000_000
     private let shortRetryMaxFailures = 3
@@ -52,6 +54,12 @@ final class AppViewModel: ObservableObject {
             pruneAndPersistSnapshots(now: Date())
             refreshLaunchAtLoginStatus()
             Storage.shared.saveRefreshInterval(settings.refreshInterval)
+            if settings.codexEquivalentValueSettings.isEnabled,
+               settings.accounts.contains(where: { $0.provider == .codex && $0.isEnabled }) {
+                Task { [weak self] in
+                    self?.codexEquivalentValueSnapshot = await CodexEquivalentValueIndexer.shared.cachedSnapshot()
+                }
+            }
         }
     }
     
@@ -132,6 +140,7 @@ final class AppViewModel: ObservableObject {
                 )
             }
             WidgetCenter.shared.reloadAllTimelines()
+            await refreshCodexEquivalentValueIfNeeded(for: activeAccounts)
             return
         }
         
@@ -144,6 +153,7 @@ final class AppViewModel: ObservableObject {
         Storage.shared.saveCycleLearningState(cycleLearningState)
         
         WidgetCenter.shared.reloadAllTimelines()
+        await refreshCodexEquivalentValueIfNeeded(for: activeAccounts)
         
         scheduleShortRetryIfNeeded(for: activeAccounts, after: newData)
     }
@@ -182,11 +192,36 @@ final class AppViewModel: ObservableObject {
         appendSnapshots(from: [updatedData], capturedAt: Date())
         Storage.shared.saveCycleLearningState(cycleLearningState)
         WidgetCenter.shared.reloadAllTimelines()
+        if account.provider == .codex {
+            await refreshCodexEquivalentValueIfNeeded(for: [account], minimumInterval: 0)
+        }
         if updatedData.errorMessage == nil {
             shortRetryFailureCounts[accountId] = nil
             cancelShortRetryLoopIfNoFailures()
         } else {
             scheduleShortRetryIfNeeded(for: [account], after: [updatedData])
+        }
+    }
+
+    private func refreshCodexEquivalentValueIfNeeded(
+        for accounts: [APIAccount],
+        minimumInterval: TimeInterval = 60
+    ) async {
+        guard settings.codexEquivalentValueSettings.isEnabled,
+              accounts.contains(where: { $0.provider == .codex && $0.isEnabled })
+        else { return }
+        if let existing = codexValueScanTask {
+            codexEquivalentValueSnapshot = await existing.value
+            return
+        }
+        let task = Task {
+            await CodexEquivalentValueIndexer.shared.refresh(minimumInterval: minimumInterval)
+        }
+        codexValueScanTask = task
+        let snapshot = await task.value
+        codexValueScanTask = nil
+        if settings.codexEquivalentValueSettings.isEnabled {
+            codexEquivalentValueSnapshot = snapshot
         }
     }
     
@@ -207,6 +242,10 @@ final class AppViewModel: ObservableObject {
 
         settings = persistedSettings
         trendWindow = persistedSettings.dashboardTrendWindow
+        if !persistedSettings.codexEquivalentValueSettings.isEnabled {
+            codexValueScanTask?.cancel()
+            codexValueScanTask = nil
+        }
         cancelShortRetryLoop()
         shortRetryFailureCounts.removeAll()
         let accountLookup = Dictionary(uniqueKeysWithValues: persistedSettings.accounts.map { ($0.id, $0) })

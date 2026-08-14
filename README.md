@@ -5,7 +5,7 @@ A macOS menu bar application for tracking API usage quotas from various AI provi
 <p align="center">
   <img src="https://img.shields.io/badge/platform-macOS%2014.0+-blue" alt="Platform">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
-  <img src="https://img.shields.io/badge/version-1.0.11-blue" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.0.12-blue" alt="Version">
 </p>
 
 ---
@@ -50,6 +50,7 @@ A macOS menu bar application for tracking API usage quotas from various AI provi
 - **Usage Progress** - Visual progress bars showing usage percentage
 - **DeepSeek Balance Trend** - Optional daily balance trend based on the last query of each day
 - **Codex Reset Time** - Shows the next reset time point for 5-hour and weekly quota windows
+- **Codex API Equivalent Value** - Shows verified paid Coding Plan text usage as a 3/7/14/30-day USD value chart using current official API prices; token details remain hidden
 - **Color-coded Status** - Green/Orange/Red based on usage level
 - **Error Handling** - Clear error messages with retry options
 
@@ -189,6 +190,7 @@ Optional environment variables:
 - **可折叠仪表盘** - 展开/折叠账户查看详情
 - **DeepSeek 余额趋势** - 可选展示每日余额趋势，每天采用当天最后一次查询结果
 - **Codex 刷新时间点** - 5 小时额度与周额度展示下一次刷新的具体时间点
+- **Codex API 等价价值** - 将可核验的付费 Coding Plan 文本用量按当前官方 API 美元单价折算，支持 3/7/14/30 天按日图表，且不展示 Token 明细
 - **用量进度条** - 可视化显示用量百分比
 - **颜色编码状态** - 根据用量级别显示绿/橙/红色
 - **错误处理** - 清晰的错误信息和重试选项
@@ -297,6 +299,13 @@ INSTALL=1 ./scripts/build-secure-local-release.sh
 ---
 
 ## Changelog / 更新日志
+
+### v1.0.12 (2026-08-14)
+
+- **New / 新增**: Add optional daily Codex Coding Plan API-equivalent value for 3, 7, 14, or 30 days, showing only USD value rather than token details / 新增可选的 Codex Coding Plan 每日 API 等价价值，支持 3、7、14、30 天范围，仅显示美元价值而不展示 Token 明细
+- **Accuracy / 准确性**: Count only records that explicitly identify a paid Coding Plan, calculate per-branch cumulative deltas, and skip replayed parent history in forked/sub-agent logs / 仅统计明确标识为付费 Coding Plan 的记录，按任务分支计算累计差值，并跳过 fork/子 agent 日志中回放的父任务历史
+- **Safety / 安全口径**: Unknown models, unverifiable records, missing cache-write telemetry, deleted logs, and other-device usage are never guessed; affected values are shown as conservative lower bounds / 未知模型、无法核验记录、缺失的缓存写入遥测、已删除日志及其他设备用量均不猜测，受影响时以保守下界展示
+- **Performance / 性能**: Stream the first local index with bounded memory, then read only appended JSONL bytes; the 10-second quota retry path does not rescan usage logs / 首次索引采用固定内存流式读取，后续仅读取 JSONL 新增字节，10 秒额度短重试不会重复扫描日志
 
 ### v1.0.11 (2026-08-11)
 

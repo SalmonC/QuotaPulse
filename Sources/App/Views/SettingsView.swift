@@ -24,6 +24,8 @@ struct SettingsView: View {
     @State private var alertCooldownMinutes: Int = 120
     @State private var deepSeekBalanceThreshold: Double = 1
     @State private var showTrendInDashboard: Bool = true
+    @State private var showCodexEquivalentValue: Bool = true
+    @State private var codexEquivalentValueWindow: TrendWindow = .week
     @State private var dashboardSortMode: DashboardSortMode = .manual
     @State private var dashboardTrendWindow: TrendWindow = .week
     @State private var launchAtLogin: Bool = false
@@ -252,6 +254,42 @@ struct SettingsView: View {
                                     }
                                     .pickerStyle(.segmented)
                                     .frame(maxWidth: 430, alignment: .leading)
+                                }
+                                .padding(10)
+                                .background(Color.secondary.opacity(0.08))
+                                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                            }
+
+                            Divider()
+
+                            Toggle(isOn: $showCodexEquivalentValue) {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(language == .english ? "Show Codex API equivalent value" : "显示 Codex API 等价价值")
+                                    Text(language == .english
+                                         ? "Verified paid Coding Plan text usage only; token details stay hidden."
+                                         : "仅统计可核验的付费 Coding Plan 文本用量，不显示 Token 明细。")
+                                        .font(.caption2)
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+                            .toggleStyle(.switch)
+
+                            if showCodexEquivalentValue {
+                                VStack(alignment: .leading, spacing: 7) {
+                                    settingLabel(language == .english ? "Value range" : "价值范围")
+                                    Picker("", selection: $codexEquivalentValueWindow) {
+                                        ForEach(TrendWindow.dashboardSelectable) { window in
+                                            Text(window.displayName(language: language)).tag(window)
+                                        }
+                                    }
+                                    .pickerStyle(.segmented)
+                                    .frame(maxWidth: 430, alignment: .leading)
+
+                                    Text(language == .english
+                                         ? "Uses current official API prices (USD, priced \(CodexEquivalentValuePricing.referenceDate))."
+                                         : "按当前官方 API 美元单价折算（价格基准 \(CodexEquivalentValuePricing.referenceDate)）。")
+                                        .font(.caption2)
+                                        .foregroundColor(.secondary)
                                 }
                                 .padding(10)
                                 .background(Color.secondary.opacity(0.08))
@@ -769,6 +807,8 @@ struct SettingsView: View {
         deepSeekBalanceThreshold = settings.deepSeekBalanceSettings.threshold
         showTrendInDashboard = settings.showTrendInDashboard
         dashboardTrendWindow = settings.dashboardTrendWindow
+        showCodexEquivalentValue = settings.codexEquivalentValueSettings.isEnabled
+        codexEquivalentValueWindow = settings.codexEquivalentValueSettings.window
         menuBarPinnedItems = MenuBarPinnedItem.normalized(settings.menuBarPinnedItems, language: language)
         dashboardSortMode = viewModel.dashboardSortMode
         viewModel.refreshLaunchAtLoginStatus()
@@ -802,6 +842,10 @@ struct SettingsView: View {
             language: language,
             alertSettings: normalizedAlertSettings(),
             deepSeekBalanceSettings: normalizedDeepSeekBalanceSettings(),
+            codexEquivalentValueSettings: CodexEquivalentValueSettings(
+                isEnabled: showCodexEquivalentValue,
+                window: codexEquivalentValueWindow
+            ),
             showTrendInDashboard: showTrendInDashboard,
             dashboardTrendWindow: dashboardTrendWindow,
             launchAtLogin: launchAtLogin,
@@ -1051,6 +1095,10 @@ struct SettingsView: View {
             language: language,
             alertSettings: normalizedAlertSettings(),
             deepSeekBalanceSettings: normalizedDeepSeekBalanceSettings(),
+            codexEquivalentValueSettings: CodexEquivalentValueSettings(
+                isEnabled: showCodexEquivalentValue,
+                window: codexEquivalentValueWindow
+            ),
             showTrendInDashboard: showTrendInDashboard,
             dashboardTrendWindow: dashboardTrendWindow,
             launchAtLogin: launchAtLogin,

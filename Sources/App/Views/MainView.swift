@@ -181,6 +181,9 @@ struct MainView: View {
                             showTrend: viewModel.settings.showTrendInDashboard && data.provider == .deepSeek,
                             deepSeekBalanceTrendPoints: viewModel.deepSeekBalanceTrendPoints(for: data.accountId, window: viewModel.trendWindow),
                             trendWindow: viewModel.trendWindow,
+                            codexEquivalentValueSnapshot: viewModel.codexEquivalentValueSnapshot,
+                            codexEquivalentValueWindow: viewModel.settings.codexEquivalentValueSettings.window,
+                            showCodexEquivalentValue: viewModel.settings.codexEquivalentValueSettings.isEnabled,
                             confidence: viewModel.dataConfidence(for: data),
                             deepSeekBalanceThreshold: viewModel.settings.deepSeekBalanceSettings.threshold,
                             isRefreshing: viewModel.refreshingAccountIDs.contains(data.accountId),
@@ -464,6 +467,9 @@ private struct UsageRowView: View {
     let showTrend: Bool
     let deepSeekBalanceTrendPoints: [DeepSeekBalanceTrendPoint]
     let trendWindow: TrendWindow
+    let codexEquivalentValueSnapshot: CodexEquivalentValueSnapshot
+    let codexEquivalentValueWindow: TrendWindow
+    let showCodexEquivalentValue: Bool
     let confidence: DataConfidence
     let deepSeekBalanceThreshold: Double
     var isRefreshing: Bool = false
@@ -487,6 +493,10 @@ private struct UsageRowView: View {
                     errorRow(error)
                 } else {
                     quotaCycleRows
+                }
+
+                if data.provider == .codex {
+                    codexEquivalentValueRow
                 }
             }
 
@@ -687,6 +697,129 @@ private struct UsageRowView: View {
                     .font(.caption2)
                     .foregroundColor(.secondary)
             }
+        }
+    }
+
+    private var visibleCodexEquivalentValues: [CodexDailyEquivalentValue] {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let start = calendar.date(
+            byAdding: .day,
+            value: -(max(codexEquivalentValueWindow.days, 1) - 1),
+            to: today
+        ) ?? today
+        return codexEquivalentValueSnapshot.dailyValues.filter { $0.day >= start && $0.day <= today }
+    }
+
+    private var codexEquivalentValueTotal: Double {
+        visibleCodexEquivalentValues.reduce(0) { $0 + $1.valueUSD }
+    }
+
+    private var codexEquivalentValueChartDomain: ClosedRange<Date> {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let start = calendar.date(
+            byAdding: .day,
+            value: -(max(codexEquivalentValueWindow.days, 1) - 1),
+            to: today
+        ) ?? today
+        let end = calendar.date(byAdding: .day, value: 1, to: today) ?? today.addingTimeInterval(86_400)
+        return start...end
+    }
+
+    private func formatUSD(_ value: Double) -> String {
+        if value >= 100 { return String(format: "$%.0f", value) }
+        if value >= 10 { return String(format: "$%.1f", value) }
+        return String(format: "$%.2f", value)
+    }
+
+    @ViewBuilder
+    private var codexEquivalentValueRow: some View {
+        if showCodexEquivalentValue {
+            let values = visibleCodexEquivalentValues
+            let lowerBoundPrefix = codexEquivalentValueSnapshot.isLowerBound ? "≥" : ""
+            VStack(alignment: .leading, spacing: 5) {
+                HStack(spacing: 5) {
+                    Image(systemName: "dollarsign.circle")
+                        .font(.caption2)
+                        .foregroundColor(providerColor)
+                    Text(language == .english ? "API equivalent" : "API 等价价值")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                    if codexEquivalentValueSnapshot.lastScannedAt == nil {
+                        Text("--")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    } else {
+                        Text("\(lowerBoundPrefix)\(formatUSD(codexEquivalentValueTotal))")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .monospacedDigit()
+                    }
+                    Spacer(minLength: 0)
+                    Text(codexEquivalentValueWindow.displayName(language: language))
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+
+                if !values.isEmpty {
+                    Chart(values) { point in
+                        BarMark(
+                            x: .value("Day", point.day, unit: .day),
+                            y: .value("USD", point.valueUSD)
+                        )
+                        .foregroundStyle(providerColor.gradient)
+                        .cornerRadius(2)
+                        .annotation(position: .top, spacing: 1) {
+                            if codexEquivalentValueWindow.days <= 7 {
+                                Text(formatUSD(point.valueUSD))
+                                    .font(.system(size: 7, weight: .medium))
+                                    .foregroundColor(.secondary)
+                                    .monospacedDigit()
+                            }
+                        }
+                    }
+                    .chartXScale(domain: codexEquivalentValueChartDomain)
+                    .chartXAxis(.hidden)
+                    .chartYAxis(.hidden)
+                    .chartPlotStyle { plot in
+                        plot
+                            .background(providerColor.opacity(0.04))
+                            .cornerRadius(6)
+                    }
+                    .frame(height: codexEquivalentValueWindow.days <= 7 ? 46 : 38)
+                } else if codexEquivalentValueSnapshot.lastScannedAt == nil {
+                    Text(codexEquivalentValueSnapshot.errorMessage == nil
+                         ? (language == .english ? "Building local usage index…" : "正在建立本机用量索引…")
+                         : (language == .english ? "Local usage index failed" : "本机用量索引失败"))
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                } else {
+                    Text(language == .english
+                         ? "No verifiable paid Coding Plan usage in this range"
+                         : "所选范围内没有可核验的付费 Coding Plan 用量")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+
+                if codexEquivalentValueSnapshot.isLowerBound, !values.isEmpty {
+                    Text(language == .english
+                         ? "Conservative lower bound; unverifiable records were excluded"
+                         : "保守下界；无法核验的记录未计入")
+                        .font(.system(size: 8))
+                        .foregroundColor(.secondary)
+                }
+
+                if codexEquivalentValueSnapshot.errorMessage != nil,
+                   codexEquivalentValueSnapshot.lastScannedAt != nil {
+                    Text(language == .english
+                         ? "Local value refresh failed; showing the last indexed result"
+                         : "本机价值统计刷新失败，当前显示上次索引结果")
+                        .font(.system(size: 8))
+                        .foregroundColor(.orange)
+                }
+            }
+            .padding(.top, 2)
         }
     }
 

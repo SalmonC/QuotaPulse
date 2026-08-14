@@ -300,6 +300,21 @@ struct DeepSeekBalanceSettings: Codable, Equatable {
     }
 }
 
+struct CodexEquivalentValueSettings: Codable, Equatable {
+    var isEnabled: Bool = true
+    var window: TrendWindow = .week
+
+    static let `default` = CodexEquivalentValueSettings()
+
+    var normalized: CodexEquivalentValueSettings {
+        var next = self
+        if !TrendWindow.dashboardSelectable.contains(next.window) {
+            next.window = .week
+        }
+        return next
+    }
+}
+
 enum MenuBarPinnedMetric: String, Codable, CaseIterable, Identifiable {
     case deepSeekBalance
     case codexFiveHourRemaining
@@ -364,6 +379,7 @@ struct AppSettings: Codable {
     var language: AppLanguage = .chinese
     var alertSettings: ThresholdAlertSettings = .default
     var deepSeekBalanceSettings: DeepSeekBalanceSettings = .default
+    var codexEquivalentValueSettings: CodexEquivalentValueSettings = .default
     var showTrendInDashboard: Bool = true
     var dashboardTrendWindow: TrendWindow = .week
     var launchAtLogin: Bool = false
@@ -376,6 +392,7 @@ struct AppSettings: Codable {
         language: AppLanguage = .chinese,
         alertSettings: ThresholdAlertSettings = .default,
         deepSeekBalanceSettings: DeepSeekBalanceSettings = .default,
+        codexEquivalentValueSettings: CodexEquivalentValueSettings = .default,
         showTrendInDashboard: Bool = true,
         dashboardTrendWindow: TrendWindow = .week,
         launchAtLogin: Bool = false,
@@ -387,6 +404,7 @@ struct AppSettings: Codable {
         self.language = language
         self.alertSettings = alertSettings.normalized
         self.deepSeekBalanceSettings = deepSeekBalanceSettings.normalized
+        self.codexEquivalentValueSettings = codexEquivalentValueSettings.normalized
         self.showTrendInDashboard = showTrendInDashboard
         self.dashboardTrendWindow = TrendWindow.dashboardSelectable.contains(dashboardTrendWindow) ? dashboardTrendWindow : .week
         self.launchAtLogin = launchAtLogin
@@ -400,6 +418,7 @@ struct AppSettings: Codable {
         case language
         case alertSettings
         case deepSeekBalanceSettings
+        case codexEquivalentValueSettings
         case showTrendInDashboard
         case dashboardTrendWindow
         case launchAtLogin
@@ -418,6 +437,7 @@ struct AppSettings: Codable {
         language = try container.decodeIfPresent(AppLanguage.self, forKey: .language) ?? .chinese
         alertSettings = (try container.decodeIfPresent(ThresholdAlertSettings.self, forKey: .alertSettings) ?? .default).normalized
         deepSeekBalanceSettings = (try container.decodeIfPresent(DeepSeekBalanceSettings.self, forKey: .deepSeekBalanceSettings) ?? .default).normalized
+        codexEquivalentValueSettings = (try container.decodeIfPresent(CodexEquivalentValueSettings.self, forKey: .codexEquivalentValueSettings) ?? .default).normalized
         showTrendInDashboard = try container.decodeIfPresent(Bool.self, forKey: .showTrendInDashboard) ?? true
         let decodedTrendWindow = try container.decodeIfPresent(TrendWindow.self, forKey: .dashboardTrendWindow) ?? .week
         dashboardTrendWindow = TrendWindow.dashboardSelectable.contains(decodedTrendWindow) ? decodedTrendWindow : .week

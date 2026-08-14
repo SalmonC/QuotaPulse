@@ -13,11 +13,13 @@
 		22A6E906D0306C61FA343D3D /* UsageDataSorting.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0CAC7C62436639BBD0B16F5 /* UsageDataSorting.swift */; };
 		28C826CE0E50865749DF28C2 /* SharedModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9414C803D917A736D233CFB1 /* SharedModels.swift */; };
 		30D02AA389725B8973EBE0AE /* UsageDataSorting.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0CAC7C62436639BBD0B16F5 /* UsageDataSorting.swift */; };
+		320BDB51592A7885254A88C0 /* CodexEquivalentValueIndexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01E5C4D4BA969FABD3472107 /* CodexEquivalentValueIndexer.swift */; };
 		324E88666A3E6F6DD291E2FC /* MenuBarIconWhite.png in Resources */ = {isa = PBXBuildFile; fileRef = 9B96BB309DBA1B3C9BA1AD5B /* MenuBarIconWhite.png */; };
 		353C599F6108B47A2C0D6B41 /* AppViewModelTrendCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F13CE13402C160304895C912 /* AppViewModelTrendCacheTests.swift */; };
 		484A216DA5B16129B197429F /* MiniMaxService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FF6B9FE16DDE191C927E55A /* MiniMaxService.swift */; };
 		53150102108CF99497BA4546 /* MiniMaxService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FF6B9FE16DDE191C927E55A /* MiniMaxService.swift */; };
 		5E84302E7AA53CFE13223001 /* SharedModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9414C803D917A736D233CFB1 /* SharedModels.swift */; };
+		5FC686DCC2A6F7E912902909 /* CodexEquivalentValueIndexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01E5C4D4BA969FABD3472107 /* CodexEquivalentValueIndexer.swift */; };
 		7B60CB45BE012D8CDB1F4BD2 /* QuotaPulseMark.swift in Sources */ = {isa = PBXBuildFile; fileRef = C72292D333BFC868DA8912F8 /* QuotaPulseMark.swift */; };
 		87331A603C5EAD3DACE9BBAF /* ProviderAccountTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58EAE0BD066387C4565E4BBE /* ProviderAccountTests.swift */; };
 		89011B2F5304B3212CB3EFDA /* QuotaPulseMark.swift in Sources */ = {isa = PBXBuildFile; fileRef = C72292D333BFC868DA8912F8 /* QuotaPulseMark.swift */; };
@@ -34,6 +36,7 @@
 		D56EB8F3911C7166AC6F678D /* KeychainPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0C6955B4263AE56DDE8FE43 /* KeychainPolicyTests.swift */; };
 		D8968224395A6FC809510369 /* CodexServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A251B17913629DA70F7514A2 /* CodexServiceTests.swift */; };
 		E0F81E5D29E851DCC65AB842 /* UpdateServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6211BC542870A74D68E8BB96 /* UpdateServiceTests.swift */; };
+		E39FD4F1385147F6A33F609A /* CodexEquivalentValueIndexerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D6532CAF38E297497E0634B /* CodexEquivalentValueIndexerTests.swift */; };
 		EE65348837B367E0CB3484D6 /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 8933A121A2B9D2EC0B16DD21 /* AppIcon.icns */; };
 /* End PBXBuildFile section */
 
@@ -48,6 +51,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		01E5C4D4BA969FABD3472107 /* CodexEquivalentValueIndexer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexEquivalentValueIndexer.swift; sourceTree = "<group>"; };
 		0409C5BC1366F82E5D7C1C86 /* ApiUsageTrackerForMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ApiUsageTrackerForMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		14F415E3ABAE6B0B1C239C1B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		1B31364AB1E3FED0DE8558EF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -59,6 +63,7 @@
 		602F70D65A9C980203F6BD98 /* KeychainManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainManager.swift; sourceTree = "<group>"; };
 		6211BC542870A74D68E8BB96 /* UpdateServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateServiceTests.swift; sourceTree = "<group>"; };
 		7BE95869E66771C1F8B0936E /* QuotaPulseTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = QuotaPulseTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		7D6532CAF38E297497E0634B /* CodexEquivalentValueIndexerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexEquivalentValueIndexerTests.swift; sourceTree = "<group>"; };
 		8892B5835F6801D9232A56D4 /* MacUsageTrackerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacUsageTrackerApp.swift; sourceTree = "<group>"; };
 		8933A121A2B9D2EC0B16DD21 /* AppIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = AppIcon.icns; sourceTree = "<group>"; };
 		9414C803D917A736D233CFB1 /* SharedModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedModels.swift; sourceTree = "<group>"; };
@@ -169,6 +174,7 @@
 			isa = PBXGroup;
 			children = (
 				F13CE13402C160304895C912 /* AppViewModelTrendCacheTests.swift */,
+				7D6532CAF38E297497E0634B /* CodexEquivalentValueIndexerTests.swift */,
 				A251B17913629DA70F7514A2 /* CodexServiceTests.swift */,
 				553D2E334889274F5D26D752 /* DeepSeekServiceTests.swift */,
 				F0C6955B4263AE56DDE8FE43 /* KeychainPolicyTests.swift */,
@@ -182,6 +188,7 @@
 		51642C9F83E5F0A190F1FB11 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				01E5C4D4BA969FABD3472107 /* CodexEquivalentValueIndexer.swift */,
 				1FF6B9FE16DDE191C927E55A /* MiniMaxService.swift */,
 			);
 			path = Services;
@@ -342,6 +349,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				320BDB51592A7885254A88C0 /* CodexEquivalentValueIndexer.swift in Sources */,
 				00F9B57E8B54F79C613BE58D /* KeychainManager.swift in Sources */,
 				53150102108CF99497BA4546 /* MiniMaxService.swift in Sources */,
 				89011B2F5304B3212CB3EFDA /* QuotaPulseMark.swift in Sources */,
@@ -356,6 +364,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				ABFE3EF76BFB7A52C5311058 /* AppViewModel.swift in Sources */,
+				5FC686DCC2A6F7E912902909 /* CodexEquivalentValueIndexer.swift in Sources */,
 				B57F915ED5C7D636FF216929 /* KeychainManager.swift in Sources */,
 				BD0C01256AD90323EA278935 /* MacUsageTrackerApp.swift in Sources */,
 				BAFDF737F3AA15CB4135459F /* MainView.swift in Sources */,
@@ -374,6 +383,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				353C599F6108B47A2C0D6B41 /* AppViewModelTrendCacheTests.swift in Sources */,
+				E39FD4F1385147F6A33F609A /* CodexEquivalentValueIndexerTests.swift in Sources */,
 				D8968224395A6FC809510369 /* CodexServiceTests.swift in Sources */,
 				AB630C8A308F0153351E1467 /* DeepSeekServiceTests.swift in Sources */,
 				D56EB8F3911C7166AC6F678D /* KeychainPolicyTests.swift in Sources */,
@@ -428,7 +438,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 32;
+				CURRENT_PROJECT_VERSION = 33;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -442,7 +452,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0.11;
+				MARKETING_VERSION = 1.0.12;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -595,7 +605,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 32;
+				CURRENT_PROJECT_VERSION = 33;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -615,7 +625,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0.11;
+				MARKETING_VERSION = 1.0.12;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
