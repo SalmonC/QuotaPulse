@@ -895,19 +895,25 @@ private struct UsageRowView: View {
     }
 
     private func deepSeekYDomain() -> ClosedRange<Double> {
-        let values = deepSeekBalanceTrendPoints.map(\.balance)
+        let values = deepSeekBalanceTrendPoints.map(\.balance).filter(\.isFinite)
         guard let minValue = values.min(), let maxValue = values.max() else {
             return 0...1
         }
+        let lower: Double
+        let upper: Double
         if abs(maxValue - minValue) < 0.000_001 {
             let bottomPadding = max(0.5, abs(maxValue) * 0.12)
             let topPadding = max(1, abs(maxValue) * 0.35)
-            return max(0, minValue - bottomPadding)...(maxValue + topPadding)
+            lower = min(0, minValue - bottomPadding)
+            upper = max(0, maxValue + topPadding)
+        } else {
+            let range = maxValue - minValue
+            let bottomPadding = max(range * 0.16, 0.5)
+            let topPadding = max(range * 0.45, 1)
+            lower = min(0, minValue - bottomPadding)
+            upper = max(0, maxValue + topPadding)
         }
-        let range = maxValue - minValue
-        let bottomPadding = max(range * 0.16, 0.5)
-        let topPadding = max(range * 0.45, 1)
-        return max(0, minValue - bottomPadding)...(maxValue + topPadding)
+        return lower < upper ? lower...upper : 0...1
     }
 
     private func shortDateLabel(_ date: Date) -> String {
