@@ -44,6 +44,7 @@ struct SettingsView: View {
 
     private enum SettingsTab: String, CaseIterable, Identifiable {
         case general
+        case display
         case accounts
 
         var id: String { rawValue }
@@ -57,6 +58,8 @@ struct SettingsView: View {
                 switch selectedSettingsTab {
                 case .general:
                     generalSettingsView
+                case .display:
+                    displaySettingsView
                 case .accounts:
                     accountsSettingsView
                 }
@@ -113,19 +116,27 @@ struct SettingsView: View {
 
                 Picker("", selection: $selectedSettingsTab) {
                     Text(language == .english ? "General" : "通用").tag(SettingsTab.general)
+                    Text(language == .english ? "Display" : "显示").tag(SettingsTab.display)
                     Text(language == .english ? "API Accounts" : "API 账号").tag(SettingsTab.accounts)
                 }
                 .pickerStyle(.segmented)
                 .labelsHidden()
-                .frame(width: language == .english ? 260 : 220)
+                .frame(width: language == .english ? 340 : 300)
 
                 Spacer(minLength: 0)
 
-                Text("v\(currentAppVersion)")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .monospacedDigit()
-                    .frame(width: 132, alignment: .trailing)
+                HStack(spacing: 7) {
+                    if hasUnsavedChanges {
+                        Text(language == .english ? "Unsaved" : "未保存")
+                            .font(.caption2.weight(.semibold))
+                            .foregroundColor(.orange)
+                    }
+                    Text("v\(currentAppVersion)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .monospacedDigit()
+                }
+                .frame(width: 132, alignment: .trailing)
             }
             .padding(.horizontal, 14)
             .padding(.top, 10)
@@ -135,59 +146,29 @@ struct SettingsView: View {
             Divider()
         }
     }
-    
+
     private var generalSettingsView: some View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
-                    if hasUnsavedChanges {
-                        Label(language == .english ? "Unsaved changes" : "有未保存改动", systemImage: "circle.fill")
-                            .font(.caption)
-                            .foregroundColor(.orange)
-                    }
-
                     generalCard(
-                        title: language == .english ? "Appearance" : "外观",
-                        icon: "textformat"
-                    ) {
-                        VStack(alignment: .leading, spacing: 7) {
-                            settingLabel(language == .english ? "Language" : "语言")
-                            Picker("", selection: $language) {
-                                Text(language == .english ? "Chinese" : "中文").tag(AppLanguage.chinese)
-                                Text(language == .english ? "English" : "英文").tag(AppLanguage.english)
-                            }
-                            .pickerStyle(.segmented)
-                            .frame(maxWidth: 260, alignment: .leading)
-                        }
-                    }
-
-                    generalCard(
-                        title: language == .english ? "Menu Bar" : "菜单栏",
-                        icon: "menubar.rectangle"
-                    ) {
-                        VStack(alignment: .leading, spacing: 10) {
-                            Text(language == .english
-                                 ? "Pin selected live values next to the menu bar icon. Values use the latest refreshed data and do not trigger extra requests."
-                                 : "将选定数据固定显示在菜单栏图标旁。数据来自最近一次刷新，不会产生额外请求。")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                                .fixedSize(horizontal: false, vertical: true)
-
-                            VStack(alignment: .leading, spacing: 8) {
-                                ForEach(MenuBarPinnedMetric.allCases) { metric in
-                                    menuBarPinnedMetricRow(metric)
-                                }
-                            }
-                        }
-                    }
-
-                    generalCard(
-                        title: language == .english ? "Refresh & Startup" : "刷新与启动",
-                        icon: "arrow.clockwise"
+                        title: language == .english ? "App" : "应用",
+                        icon: "gearshape"
                     ) {
                         VStack(alignment: .leading, spacing: 12) {
-                            VStack(alignment: .leading, spacing: 7) {
-                                settingLabel(language == .english ? "Auto refresh" : "自动刷新")
+                            alignedSettingRow(language == .english ? "Language" : "语言") {
+                                Picker("", selection: $language) {
+                                    Text(language == .english ? "Chinese" : "中文").tag(AppLanguage.chinese)
+                                    Text(language == .english ? "English" : "英文").tag(AppLanguage.english)
+                                }
+                                .pickerStyle(.segmented)
+                                .labelsHidden()
+                                .frame(maxWidth: 260, alignment: .leading)
+                            }
+
+                            Divider()
+
+                            alignedSettingRow(language == .english ? "Auto refresh" : "自动刷新") {
                                 Picker("", selection: $refreshInterval) {
                                     Text(language == .english ? "1m" : "1 分钟").tag(1)
                                     Text(language == .english ? "5m" : "5 分钟").tag(5)
@@ -196,13 +177,21 @@ struct SettingsView: View {
                                     Text(language == .english ? "1h" : "1 小时").tag(60)
                                 }
                                 .pickerStyle(.segmented)
-                                .frame(maxWidth: 560, alignment: .leading)
+                                .labelsHidden()
+                                .frame(maxWidth: 500, alignment: .leading)
                             }
 
                             Divider()
 
                             Toggle(isOn: $launchAtLogin) {
-                                Text(language == .english ? "Launch at login" : "开机自启动")
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(language == .english ? "Launch at login" : "开机自启动")
+                                    Text(language == .english
+                                         ? "Start QuotaPulse after signing in to macOS."
+                                         : "登录 macOS 后自动启动 QuotaPulse。")
+                                        .font(.caption2)
+                                        .foregroundColor(.secondary)
+                                }
                             }
                             .toggleStyle(.switch)
 
@@ -220,133 +209,59 @@ struct SettingsView: View {
                     }
 
                     generalCard(
-                        title: language == .english ? "Dashboard" : "看板",
-                        icon: "rectangle.grid.1x2"
-                    ) {
-                        VStack(alignment: .leading, spacing: 12) {
-                            VStack(alignment: .leading, spacing: 7) {
-                                settingLabel(language == .english ? "Card order" : "卡片排序")
-                                Picker("", selection: $dashboardSortMode) {
-                                    ForEach(DashboardSortMode.allCases) { mode in
-                                        Label(mode.displayName(language: language), systemImage: dashboardSortModeIconName(mode))
-                                            .tag(mode)
-                                    }
-                                }
-                                .pickerStyle(.segmented)
-                                .frame(maxWidth: 430, alignment: .leading)
-                            }
-
-                            Divider()
-
-                            Toggle(isOn: $showTrendInDashboard) {
-                                Text(language == .english ? "Show DeepSeek balance trend" : "显示 DeepSeek 余额趋势")
-                            }
-                            .toggleStyle(.switch)
-                            .help(language == .english ? "Only applies to DeepSeek cards" : "仅适用于 DeepSeek 卡片")
-
-                            if showTrendInDashboard {
-                                VStack(alignment: .leading, spacing: 7) {
-                                    settingLabel(language == .english ? "Trend range" : "趋势范围")
-                                    Picker("", selection: $dashboardTrendWindow) {
-                                        ForEach(TrendWindow.dashboardSelectable) { window in
-                                            Text(window.displayName(language: language)).tag(window)
-                                        }
-                                    }
-                                    .pickerStyle(.segmented)
-                                    .frame(maxWidth: 430, alignment: .leading)
-                                }
-                                .padding(10)
-                                .background(Color.secondary.opacity(0.08))
-                                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                            }
-
-                            Divider()
-
-                            Toggle(isOn: $showCodexEquivalentValue) {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(language == .english ? "Show Codex API equivalent value" : "显示 Codex API 等价价值")
-                                    Text(language == .english
-                                         ? "Verified paid Coding Plan text usage only; token details stay hidden."
-                                         : "仅统计可核验的付费 Coding Plan 文本用量，不显示 Token 明细。")
-                                        .font(.caption2)
-                                        .foregroundColor(.secondary)
-                                }
-                            }
-                            .toggleStyle(.switch)
-
-                            if showCodexEquivalentValue {
-                                VStack(alignment: .leading, spacing: 7) {
-                                    settingLabel(language == .english ? "Value range" : "价值范围")
-                                    Picker("", selection: $codexEquivalentValueWindow) {
-                                        ForEach(TrendWindow.dashboardSelectable) { window in
-                                            Text(window.displayName(language: language)).tag(window)
-                                        }
-                                    }
-                                    .pickerStyle(.segmented)
-                                    .frame(maxWidth: 430, alignment: .leading)
-
-                                    Text(language == .english
-                                         ? "Uses current official API prices (USD, priced \(CodexEquivalentValuePricing.referenceDate))."
-                                         : "按当前官方 API 美元单价折算（价格基准 \(CodexEquivalentValuePricing.referenceDate)）。")
-                                        .font(.caption2)
-                                        .foregroundColor(.secondary)
-                                }
-                                .padding(10)
-                                .background(Color.secondary.opacity(0.08))
-                                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                            }
-                        }
-                    }
-
-                    generalCard(
-                        title: language == .english ? "Alerts & Thresholds" : "提醒与阈值",
+                        title: language == .english ? "Notifications" : "通知",
                         icon: "bell.badge"
                     ) {
                         VStack(alignment: .leading, spacing: 12) {
                             Toggle(isOn: $alertsEnabled) {
-                                Text(language == .english ? "Enable low-quota notifications" : "开启低余量通知")
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(language == .english ? "Low-quota notification" : "低余量通知")
+                                    Text(language == .english
+                                         ? "MiniMax, Tavily, and Codex. Codex checks the 5-hour quota when available, otherwise the weekly quota."
+                                         : "适用于 MiniMax、Tavily 和 Codex；Codex 有 5 小时额度时按其判断，缺失时按周额度判断。")
+                                        .font(.caption2)
+                                        .foregroundColor(.secondary)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                }
                             }
                             .toggleStyle(.switch)
 
                             if alertsEnabled {
-                                VStack(alignment: .leading, spacing: 8) {
-                                    VStack(alignment: .leading, spacing: 8) {
-                                        HStack {
-                                            settingLabel(language == .english ? "Notify when usage reaches" : "用量达到时通知")
-                                            Spacer()
-                                            Text("\(warningThreshold)%")
-                                                .font(.headline)
-                                                .fontDesign(.rounded)
-                                                .monospacedDigit()
-                                        }
-
-                                        Slider(
-                                            value: Binding(
-                                                get: { Double(warningThreshold) },
-                                                set: { newValue in
-                                                    let stepped = Int((newValue / 5).rounded() * 5)
-                                                    warningThreshold = min(max(stepped, 50), 100)
-                                                    criticalThreshold = warningThreshold
-                                                }
-                                            ),
-                                            in: 50...100,
-                                            step: 5
-                                        )
-
-                                        HStack {
-                                            Text("50%")
-                                            Spacer()
-                                            Text("75%")
-                                            Spacer()
-                                            Text("100%")
-                                        }
-                                        .font(.caption2)
-                                        .foregroundColor(.secondary)
-
+                                VStack(alignment: .leading, spacing: 10) {
+                                    HStack {
+                                        settingLabel(language == .english ? "Notify when usage reaches" : "已用额度达到")
+                                        Spacer()
+                                        Text("\(warningThreshold)%")
+                                            .font(.headline)
+                                            .fontDesign(.rounded)
+                                            .monospacedDigit()
                                     }
 
+                                    Slider(
+                                        value: Binding(
+                                            get: { Double(warningThreshold) },
+                                            set: { newValue in
+                                                let stepped = Int((newValue / 5).rounded() * 5)
+                                                warningThreshold = min(max(stepped, 50), 100)
+                                                criticalThreshold = warningThreshold
+                                            }
+                                        ),
+                                        in: 50...100,
+                                        step: 5
+                                    )
+
+                                    HStack {
+                                        Text("50%")
+                                        Spacer()
+                                        Text("75%")
+                                        Spacer()
+                                        Text("100%")
+                                    }
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+
                                     compactThresholdPicker(
-                                        title: language == .english ? "Cooldown" : "冷却",
+                                        title: language == .english ? "Repeat interval" : "重复提醒间隔",
                                         valueText: cooldownLabel(alertCooldownMinutes)
                                     ) {
                                         Picker("", selection: $alertCooldownMinutes) {
@@ -359,44 +274,7 @@ struct SettingsView: View {
                                         .pickerStyle(.segmented)
                                     }
                                 }
-                                .padding(10)
-                                .background(Color.gray.opacity(0.08))
-                                .cornerRadius(10)
-                            }
-
-                            Divider()
-
-                            VStack(alignment: .leading, spacing: 8) {
-                                HStack {
-                                    Text(language == .english ? "DeepSeek low balance color threshold" : "DeepSeek 低余额颜色阈值")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                    Spacer()
-                                    Text(String(format: "%.2f", max(0, deepSeekBalanceThreshold)))
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                        .monospacedDigit()
-                                }
-
-                                HStack(spacing: 8) {
-                                    TextField(
-                                        language == .english ? "Threshold" : "阈值",
-                                        value: $deepSeekBalanceThreshold,
-                                        format: .number.precision(.fractionLength(0...2))
-                                    )
-                                    .textFieldStyle(.roundedBorder)
-                                    .frame(width: 120)
-                                    .onChange(of: deepSeekBalanceThreshold) { _, newValue in
-                                        if !newValue.isFinite || newValue < 0 {
-                                            deepSeekBalanceThreshold = 0
-                                        }
-                                    }
-
-                                    Text(language == .english ? "Dashboard color only" : "仅影响看板颜色")
-                                        .font(.caption2)
-                                        .foregroundColor(.secondary)
-                                        .fixedSize(horizontal: false, vertical: true)
-                                }
+                                .padding(.leading, 18)
                             }
                         }
                     }
@@ -445,12 +323,9 @@ struct SettingsView: View {
                                     )
                                 )
 
-                                Button(action: {
+                                Button(language == .english ? "Default" : "恢复默认") {
                                     hotkey = HotkeySetting.defaultHotkey
                                     hotkeyError = nil
-                                }) {
-                                    Text(language == .english ? "Default" : "默认")
-                                        .font(.caption)
                                 }
                                 .buttonStyle(.bordered)
 
@@ -471,7 +346,7 @@ struct SettingsView: View {
                     }
 
                     generalCard(
-                        title: language == .english ? "Updates & Project" : "更新与项目",
+                        title: language == .english ? "About & Updates" : "关于与更新",
                         icon: "arrow.triangle.2.circlepath"
                     ) {
                         VStack(alignment: .leading, spacing: 8) {
@@ -495,21 +370,16 @@ struct SettingsView: View {
                                     .frame(maxWidth: .infinity, minHeight: buttonHeight, maxHeight: buttonHeight)
                                 }
                                 .buttonStyle(.borderedProminent)
-                                .controlSize(.regular)
                                 .disabled(updateService.isChecking)
                                 .animation(.none, value: updateService.isChecking)
 
                                 Button(action: {
                                     updateService.openGitHubReadme()
                                 }) {
-                                    HStack(spacing: 6) {
-                                        Image(systemName: "book")
-                                        Text(language == .english ? "GitHub README" : "GitHub 文档")
-                                    }
-                                    .frame(maxWidth: .infinity, minHeight: buttonHeight, maxHeight: buttonHeight)
+                                    Label(language == .english ? "Documentation" : "使用文档", systemImage: "book")
+                                        .frame(maxWidth: .infinity, minHeight: buttonHeight, maxHeight: buttonHeight)
                                 }
                                 .buttonStyle(.bordered)
-                                .controlSize(.regular)
                             }
 
                             if let statusMessage = updateService.statusMessage {
@@ -529,7 +399,148 @@ struct SettingsView: View {
                             }
                         }
                     }
+                }
+                .padding(16)
+                .padding(.bottom, 8)
+            }
 
+            stickySaveBar(primary: true)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+
+    private var displaySettingsView: some View {
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 12) {
+                    generalCard(
+                        title: language == .english ? "Dashboard" : "看板",
+                        icon: "rectangle.grid.1x2"
+                    ) {
+                        VStack(alignment: .leading, spacing: 12) {
+                            alignedSettingRow(language == .english ? "Card order" : "卡片排序") {
+                                Picker("", selection: $dashboardSortMode) {
+                                    ForEach(DashboardSortMode.allCases) { mode in
+                                        Text(mode.displayName(language: language)).tag(mode)
+                                    }
+                                }
+                                .pickerStyle(.segmented)
+                                .labelsHidden()
+                                .frame(maxWidth: 430, alignment: .leading)
+                            }
+
+                            Divider()
+
+                            VStack(alignment: .leading, spacing: 10) {
+                                Toggle(isOn: $showTrendInDashboard) {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(language == .english ? "DeepSeek balance trend" : "DeepSeek 余额趋势")
+                                        Text(language == .english
+                                             ? "Shows one end-of-day balance point for each day with available data."
+                                             : "按天显示有查询记录日期的最后一次余额。")
+                                            .font(.caption2)
+                                            .foregroundColor(.secondary)
+                                    }
+                                }
+                                .toggleStyle(.switch)
+
+                                if showTrendInDashboard {
+                                    alignedSettingRow(language == .english ? "Range" : "显示范围") {
+                                        Picker("", selection: $dashboardTrendWindow) {
+                                            ForEach(TrendWindow.dashboardSelectable) { window in
+                                                Text(window.displayName(language: language)).tag(window)
+                                            }
+                                        }
+                                        .pickerStyle(.segmented)
+                                        .labelsHidden()
+                                        .frame(maxWidth: 430, alignment: .leading)
+                                    }
+                                    .padding(.leading, 18)
+                                }
+
+                                HStack(alignment: .center, spacing: 12) {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(language == .english ? "Balance turns red below" : "余额变红阈值")
+                                        Text(language == .english
+                                             ? "Dashboard color only; uses the numeric value of the returned currency."
+                                             : "仅影响看板颜色，按接口返回币种的数值判断。")
+                                            .font(.caption2)
+                                            .foregroundColor(.secondary)
+                                    }
+                                    Spacer(minLength: 12)
+                                    TextField(
+                                        language == .english ? "Threshold" : "阈值",
+                                        value: $deepSeekBalanceThreshold,
+                                        format: .number.precision(.fractionLength(0...2))
+                                    )
+                                    .textFieldStyle(.roundedBorder)
+                                    .frame(width: 120)
+                                    .onChange(of: deepSeekBalanceThreshold) { _, newValue in
+                                        if !newValue.isFinite || newValue < 0 {
+                                            deepSeekBalanceThreshold = 0
+                                        }
+                                    }
+                                }
+                            }
+
+                            Divider()
+
+                            VStack(alignment: .leading, spacing: 10) {
+                                Toggle(isOn: $showCodexEquivalentValue) {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(language == .english ? "Codex API equivalent value" : "Codex API 等价价值")
+                                        Text(language == .english
+                                             ? "Converts verified paid Coding Plan text usage to official API prices; only the value is shown."
+                                             : "将可核验的付费 Coding Plan 文本用量按官方 API 价格折算；只显示金额。")
+                                            .font(.caption2)
+                                            .foregroundColor(.secondary)
+                                            .fixedSize(horizontal: false, vertical: true)
+                                    }
+                                }
+                                .toggleStyle(.switch)
+
+                                if showCodexEquivalentValue {
+                                    alignedSettingRow(language == .english ? "Range" : "显示范围") {
+                                        Picker("", selection: $codexEquivalentValueWindow) {
+                                            ForEach(TrendWindow.dashboardSelectable) { window in
+                                                Text(window.displayName(language: language)).tag(window)
+                                            }
+                                        }
+                                        .pickerStyle(.segmented)
+                                        .labelsHidden()
+                                        .frame(maxWidth: 430, alignment: .leading)
+                                    }
+                                    .padding(.leading, 18)
+
+                                    Text(language == .english
+                                         ? "USD prices as of \(CodexEquivalentValuePricing.referenceDate). Requires an enabled Codex account."
+                                         : "美元价格基准：\(CodexEquivalentValuePricing.referenceDate)。需要启用 Codex 账号。")
+                                        .font(.caption2)
+                                        .foregroundColor(.secondary)
+                                        .padding(.leading, 18)
+                                }
+                            }
+                        }
+                    }
+
+                    generalCard(
+                        title: language == .english ? "Menu Bar Values" : "菜单栏常驻数据",
+                        icon: "menubar.rectangle"
+                    ) {
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text(language == .english
+                                 ? "Uses the latest dashboard data and does not make extra requests."
+                                 : "使用看板最近一次数据，不会产生额外请求。")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+
+                            VStack(alignment: .leading, spacing: 8) {
+                                ForEach(MenuBarPinnedMetric.allCases) { metric in
+                                    menuBarPinnedMetricRow(metric)
+                                }
+                            }
+                        }
+                    }
                 }
                 .padding(16)
                 .padding(.bottom, 8)
@@ -546,19 +557,13 @@ struct SettingsView: View {
         @ViewBuilder content: () -> Content
     ) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            HStack(alignment: .top, spacing: 8) {
-                ZStack {
-                    Circle()
-                        .fill(Color.accentColor.opacity(0.14))
-                        .frame(width: 26, height: 26)
-                    Image(systemName: icon)
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(.accentColor)
-                }
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(title)
-                        .font(.headline)
-                }
+            HStack(alignment: .center, spacing: 7) {
+                Image(systemName: icon)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(.accentColor)
+                    .frame(width: 18)
+                Text(title)
+                    .font(.headline)
                 Spacer(minLength: 0)
             }
 
@@ -569,10 +574,18 @@ struct SettingsView: View {
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color(NSColor.controlBackgroundColor))
         )
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.primary.opacity(0.06), lineWidth: 1)
-        )
+    }
+
+    private func alignedSettingRow<Content: View>(
+        _ title: String,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        HStack(alignment: .center, spacing: 16) {
+            Text(title)
+                .frame(width: language == .english ? 150 : 120, alignment: .leading)
+            content()
+            Spacer(minLength: 0)
+        }
     }
 
     private func settingLabel(_ text: String) -> some View {
@@ -586,20 +599,11 @@ struct SettingsView: View {
         VStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(alignment: .center, spacing: 10) {
+                    Text(language == .english ? "Accounts" : "账号")
+                        .font(.headline)
                     Spacer()
-                    if hasUnsavedChanges {
-                        Text(language == .english ? "Unsaved" : "未保存")
-                            .font(.caption2)
-                            .fontWeight(.semibold)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Color.orange.opacity(0.16))
-                            .foregroundColor(.orange)
-                            .clipShape(Capsule())
-                    }
                     Button(action: addAccount) {
-                        Label(language == .english ? "Add" : "新增", systemImage: "plus")
-                            .labelStyle(.iconOnly)
+                        Label(language == .english ? "Add Account" : "新增账号", systemImage: "plus")
                     }
                     .buttonStyle(.borderedProminent)
                     .controlSize(.small)
@@ -608,7 +612,7 @@ struct SettingsView: View {
                     VStack {
                         Text(language == .english ? "No API accounts configured" : "当前没有配置 API 账号")
                             .foregroundColor(.secondary)
-                        Text(language == .english ? "Click + to add an account" : "点击 + 新增账号")
+                        Text(language == .english ? "Use Add Account to get started" : "点击“新增账号”开始配置")
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -665,7 +669,7 @@ struct SettingsView: View {
             .padding(16)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
 
-            stickySaveBar(primary: false)
+            stickySaveBar(primary: true)
         }
     }
 
@@ -1122,28 +1126,41 @@ struct SettingsView: View {
     }
 
     private func menuBarPinnedMetricRow(_ metric: MenuBarPinnedMetric) -> some View {
-        HStack(alignment: .center, spacing: 10) {
-            Toggle(isOn: menuBarPinnedEnabledBinding(for: metric)) {
-                Text(metric.displayName(language: language))
-                    .font(.subheadline)
+        let isEnabled = menuBarPinnedEnabledBinding(for: metric).wrappedValue
+        return VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .center, spacing: 10) {
+                Toggle(isOn: menuBarPinnedEnabledBinding(for: metric)) {
+                    Text(metric.displayName(language: language))
+                        .font(.subheadline)
+                }
+                .toggleStyle(.checkbox)
+
+                Spacer(minLength: 0)
+
+                if isEnabled {
+                    Text(menuBarPinnedPreviewText(for: metric))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .monospacedDigit()
+                }
             }
-            .toggleStyle(.checkbox)
-            .frame(width: language == .english ? 190 : 150, alignment: .leading)
 
-            TextField(
-                language == .english ? "Custom text" : "自定义文本",
-                text: menuBarPinnedPrefixBinding(for: metric)
-            )
-            .textFieldStyle(.roundedBorder)
-            .frame(maxWidth: 180)
-            .disabled(!menuBarPinnedEnabledBinding(for: metric).wrappedValue)
-
-            Text(menuBarPinnedPreviewText(for: metric))
-                .font(.caption)
-                .foregroundColor(.secondary)
-                .monospacedDigit()
-
-            Spacer(minLength: 0)
+            if isEnabled {
+                HStack(spacing: 10) {
+                    Text(language == .english ? "Label" : "前缀文字")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .frame(width: language == .english ? 72 : 64, alignment: .leading)
+                    TextField(
+                        language == .english ? "Optional" : "可留空",
+                        text: menuBarPinnedPrefixBinding(for: metric)
+                    )
+                    .textFieldStyle(.roundedBorder)
+                    .frame(maxWidth: 220)
+                    Spacer(minLength: 0)
+                }
+                .padding(.leading, 20)
+            }
         }
         .padding(8)
         .background(Color.secondary.opacity(0.07))

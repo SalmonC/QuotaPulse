@@ -5,7 +5,7 @@ A macOS menu bar application for tracking API usage quotas from various AI provi
 <p align="center">
   <img src="https://img.shields.io/badge/platform-macOS%2014.0+-blue" alt="Platform">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
-  <img src="https://img.shields.io/badge/version-1.0.12-blue" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.0.13-blue" alt="Version">
 </p>
 
 ---
@@ -299,6 +299,12 @@ INSTALL=1 ./scripts/build-secure-local-release.sh
 ---
 
 ## Changelog / 更新日志
+
+### v1.0.13 (2026-08-20)
+
+- **Fix / 修复**: Treat DeepSeek `is_available=false` as a valid exhausted-balance state and keep the account visible at zero instead of reporting an authentication failure / 将 DeepSeek `is_available=false` 按官方语义视为余额不足，余额为零时仍保留账号卡片，不再误报鉴权失败
+- **Fix / 修复**: Repair stale launch-at-login registrations that still point to a DerivedData test build, so the installed app and its newer features reliably launch after sign-in / 自动修复仍指向 DerivedData 测试版的开机启动项，确保登录后启动已安装的正式版及新功能
+- **UI / 界面**: Reorganize Settings into General, Display, and API Accounts with clearer grouping, progressive disclosure, and shorter descriptions / 将设置重组为“通用 / 显示 / API 账号”，优化分组、渐进展开与文案密度
 
 ### v1.0.12 (2026-08-14)
 

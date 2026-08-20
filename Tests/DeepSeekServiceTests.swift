@@ -51,7 +51,7 @@ final class DeepSeekServiceTests: XCTestCase {
         XCTAssertNil(estimated[1].estimatedConsumption)
     }
 
-    func testUnavailableBalanceResponseThrowsHelpfulError() throws {
+    func testUnavailableBalanceResponseIsTreatedAsZeroBalance() throws {
         let payload = """
         {
           "is_available": false,
@@ -59,11 +59,8 @@ final class DeepSeekServiceTests: XCTestCase {
         }
         """
 
-        XCTAssertThrowsError(try DeepSeekService.parseBalanceResponse(Data(payload.utf8))) { error in
-            guard case APIError.httpErrorWithMessage(403, let message) = error else {
-                return XCTFail("Expected DeepSeek unavailable error, got \(error)")
-            }
-            XCTAssertTrue(message.contains("DeepSeek"))
-        }
+        let result = try DeepSeekService.parseBalanceResponse(Data(payload.utf8))
+        XCTAssertEqual(result.remaining, 0)
+        XCTAssertTrue(result.balanceDetails.isEmpty)
     }
 }

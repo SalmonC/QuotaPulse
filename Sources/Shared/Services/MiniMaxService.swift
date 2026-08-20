@@ -186,8 +186,17 @@ final class DeepSeekService: UsageService {
 
     static func parseBalanceResponse(_ data: Data) throws -> UsageResult {
         let response = try JSONDecoder().decode(DeepSeekBalanceResponse.self, from: data)
-        guard response.isAvailable else {
-            throw APIError.httpErrorWithMessage(403, "DeepSeek 账户余额当前不可用，请检查账户状态")
+        guard response.isAvailable || !response.balanceInfos.isEmpty else {
+            // DeepSeek defines is_available as "has enough balance for API calls".
+            // A false value is therefore a valid zero-balance response, not an
+            // authentication failure.
+            return UsageResult(
+                remaining: 0,
+                used: nil,
+                total: nil,
+                refreshTime: nil,
+                balanceDetails: []
+            )
         }
         guard !response.balanceInfos.isEmpty else {
             throw APIError.invalidResponse

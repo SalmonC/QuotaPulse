@@ -39,6 +39,7 @@ final class AppViewModel: ObservableObject {
     private let shortRetryMaxFailures = 3
     private var didLogPreservedEmptyRefresh = false
     private var didLogEmptyRefreshResults = false
+    private let launchAtLoginBundlePathKey = "launchAtLogin.registeredBundlePath"
     var onSettingsSaved: (() -> Void)?
     var onOpenSettings: (() -> Void)?
     
@@ -52,7 +53,9 @@ final class AppViewModel: ObservableObject {
             loadCachedData()
             rebuildSnapshotsIndex()
             pruneAndPersistSnapshots(now: Date())
+            let launchAtLoginWasRequested = settings.launchAtLogin
             refreshLaunchAtLoginStatus()
+            repairLaunchAtLoginRegistrationIfNeeded(wasRequested: launchAtLoginWasRequested)
             Storage.shared.saveRefreshInterval(settings.refreshInterval)
             if settings.codexEquivalentValueSettings.isEnabled,
                settings.accounts.contains(where: { $0.provider == .codex && $0.isEnabled }) {
@@ -269,11 +272,20 @@ final class AppViewModel: ObservableObject {
     func setLaunchAtLoginEnabled(_ enabled: Bool) -> Bool {
         do {
             if enabled {
-                if SMAppService.mainApp.status != .enabled {
+                let currentPath = Bundle.main.bundleURL.standardizedFileURL.path
+                let registeredPath = UserDefaults.standard.string(forKey: launchAtLoginBundlePathKey)
+                var needsRegistration = SMAppService.mainApp.status != .enabled
+                if registeredPath != currentPath {
+                    try? SMAppService.mainApp.unregister()
+                    needsRegistration = true
+                }
+                if needsRegistration {
                     try SMAppService.mainApp.register()
                 }
+                UserDefaults.standard.set(currentPath, forKey: launchAtLoginBundlePathKey)
             } else if SMAppService.mainApp.status == .enabled {
                 try SMAppService.mainApp.unregister()
+                UserDefaults.standard.removeObject(forKey: launchAtLoginBundlePathKey)
             }
             launchAtLoginErrorMessage = nil
         } catch {
@@ -283,6 +295,16 @@ final class AppViewModel: ObservableObject {
 
         refreshLaunchAtLoginStatus()
         return launchAtLoginEnabled == enabled
+    }
+
+    private func repairLaunchAtLoginRegistrationIfNeeded(wasRequested: Bool) {
+        let currentPath = Bundle.main.bundleURL.standardizedFileURL.path
+        guard currentPath.hasPrefix("/Applications/"),
+              wasRequested || SMAppService.mainApp.status == .enabled
+        else { return }
+        let registeredPath = UserDefaults.standard.string(forKey: launchAtLoginBundlePathKey)
+        guard registeredPath != currentPath else { return }
+        _ = setLaunchAtLoginEnabled(true)
     }
 
     nonisolated private static func isLaunchAtLoginEnabled() -> Bool {
