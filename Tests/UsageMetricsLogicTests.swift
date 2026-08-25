@@ -72,6 +72,31 @@ final class UsageMetricsLogicTests: XCTestCase {
         XCTAssertEqual(points.map { calendar.component(.day, from: $0.day) }, [21, 23, 24])
     }
 
+    func testDeepSeekFirstVisibleDayUsesPreviousAvailableBalance() throws {
+        let accountId = UUID()
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(secondsFromGMT: 0)!
+        let now = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 8, day: 25, hour: 12)))
+        let beforeWindow = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 8, day: 17, hour: 18)))
+        let firstVisibleDay = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 8, day: 20, hour: 9)))
+        let unchangedDay = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 8, day: 21, hour: 9)))
+
+        let points = UsageMetricsLogic.deepSeekDailyBalancePoints(
+            accountSnapshots: [
+                makeDeepSeekBalanceSnapshot(accountID: accountId, date: beforeWindow, balance: 0.25),
+                makeDeepSeekBalanceSnapshot(accountID: accountId, date: firstVisibleDay, balance: -1.73),
+                makeDeepSeekBalanceSnapshot(accountID: accountId, date: unchangedDay, balance: -1.73)
+            ],
+            window: .week,
+            now: now,
+            calendar: calendar
+        )
+
+        XCTAssertEqual(points.map(\.balance), [-1.73, -1.73])
+        XCTAssertEqual(points[0].deltaFromPrevious ?? 0, -1.98, accuracy: 0.000_001)
+        XCTAssertEqual(points[1].deltaFromPrevious ?? 1, 0, accuracy: 0.000_001)
+    }
+
     func testDataConfidenceClassification() {
         let base = UsageData(
             accountId: UUID(),

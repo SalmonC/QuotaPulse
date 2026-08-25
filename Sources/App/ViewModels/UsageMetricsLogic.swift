@@ -97,17 +97,29 @@ enum UsageMetricsLogic {
             return []
         }
 
-        let source = accountSnapshots
+        let validSnapshots = accountSnapshots
             .filter {
                 $0.provider == .deepSeek &&
-                $0.capturedAt >= startDay &&
                 $0.capturedAt < endExclusive &&
                 $0.balanceTotal != nil &&
                 $0.balanceCurrency != nil
             }
             .sorted { $0.capturedAt < $1.capturedAt }
 
+        let source = validSnapshots.filter { $0.capturedAt >= startDay }
+
         guard !source.isEmpty else { return [] }
+
+        // Seed each currency with the most recent value before the visible
+        // range so the first displayed day still gets a meaningful delta.
+        var previousByCurrency: [String: Double] = [:]
+        for snapshot in validSnapshots where snapshot.capturedAt < startDay {
+            guard
+                let balance = snapshot.balanceTotal,
+                let currency = snapshot.balanceCurrency?.uppercased()
+            else { continue }
+            previousByCurrency[currency] = balance
+        }
 
         var lastByDayAndCurrency: [String: UsageSnapshot] = [:]
         for snapshot in source {
@@ -124,7 +136,6 @@ enum UsageMetricsLogic {
             return $0.capturedAt < $1.capturedAt
         }
 
-        var previousByCurrency: [String: Double] = [:]
         return sortedLastSnapshots.compactMap { snapshot in
             guard
                 let balance = snapshot.balanceTotal,

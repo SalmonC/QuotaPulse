@@ -870,7 +870,7 @@ private struct UsageRowView: View {
         if value < -0.000_001 {
             return "-" + formatCurrency(abs(value), currency: currency)
         }
-        return formatCurrency(0, currency: currency)
+        return "±" + formatCurrency(0, currency: currency)
     }
 
     private func deltaColor(_ delta: Double?) -> Color {
@@ -942,28 +942,34 @@ private struct UsageRowView: View {
                         .foregroundColor(.secondary)
                 }
 
-                Chart(deepSeekBalanceTrendPoints) { point in
-                    LineMark(
-                        x: .value("Day", point.day),
-                        y: .value("Balance", point.balance)
-                    )
-                    .interpolationMethod(.linear)
-                    .lineStyle(StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
-                    .foregroundStyle(providerColor.gradient)
+                Chart {
+                    RuleMark(y: .value("Zero balance", 0))
+                        .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 3]))
+                        .foregroundStyle(Color.secondary.opacity(0.35))
 
-                    PointMark(
-                        x: .value("Day", point.day),
-                        y: .value("Balance", point.balance)
-                    )
-                    .symbolSize(28)
-                    .foregroundStyle(deltaColor(point.deltaFromPrevious))
-                    .annotation(position: .top, spacing: 2) {
-                        if let delta = point.deltaFromPrevious {
-                            Text(formatSignedCurrency(delta, currency: point.currency))
-                                .font(.system(size: 8, weight: .semibold))
-                                .foregroundColor(deltaColor(delta))
-                                .monospacedDigit()
-                                .lineLimit(1)
+                    ForEach(deepSeekBalanceTrendPoints) { point in
+                        LineMark(
+                            x: .value("Day", point.day),
+                            y: .value("Balance", point.balance)
+                        )
+                        .interpolationMethod(.linear)
+                        .lineStyle(StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
+                        .foregroundStyle(providerColor.gradient)
+
+                        PointMark(
+                            x: .value("Day", point.day),
+                            y: .value("Balance", point.balance)
+                        )
+                        .symbolSize(28)
+                        .foregroundStyle(deltaColor(point.deltaFromPrevious))
+                        .annotation(position: .top, spacing: 2) {
+                            if let delta = point.deltaFromPrevious {
+                                Text(formatSignedCurrency(delta, currency: point.currency))
+                                    .font(.system(size: 8, weight: .semibold))
+                                    .foregroundColor(deltaColor(delta))
+                                    .monospacedDigit()
+                                    .lineLimit(1)
+                            }
                         }
                     }
                 }
