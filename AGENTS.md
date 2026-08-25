@@ -1,8 +1,66 @@
 # API Usage Tracker for Mac - Agent Guide
 
+## Project Identity and Delivery Contract
+
+This section is authoritative for build, install, startup, persistence, and
+release work. Read the global delivery standard at
+`/Users/salmonc/.codex/standards/DEVELOPMENT_DELIVERY_STANDARD.md` before any
+such operation.
+
+- **Product/display name**: QuotaPulse
+- **Canonical installed app**: `/Applications/QuotaPulse.app`
+- **Executable/process name**: `QuotaPulse`
+- **Main Bundle ID**: `com.mactools.apiusagetracker`
+- **Widget Bundle ID**: `com.mactools.apiusagetracker.widget`
+- **App Group**: `group.com.mactools.apiusagetracker`
+- **Authoritative version source**: `VERSION`; `project.yml` and the generated
+  Xcode project must match it.
+- **Build policy**: increment `BUILD` for every candidate installed over an
+  earlier build, even when the marketing version is unchanged.
+- **Project generator**: `project.yml` via XcodeGen. Do not hand-edit generated
+  project settings.
+- **Secure package/install entry point**:
+  `INSTALL=1 ./scripts/build-secure-local-release.sh`
+- **Artifact directory**: `Artifacts/v$VERSION/`; differing builds must not
+  silently overwrite a formal artifact with the same name. Include the build
+  number or archive the old artifact first.
+- **Signing identity**: the secure release script must preserve the installed
+  app's Team ID and designated requirement unless a migration is explicitly
+  authorized.
+- **Startup mechanism**: `SMAppService.mainApp`; only the canonical installed
+  app may register. Debug/test bundles must never register.
+- **Settings/cache namespace**: the App Group UserDefaults suite above.
+- **Credential storage**: Keychain via `KeychainManager`; Keychain service,
+  account format, signing identity, and migration markers are persistent
+  identity contracts.
+- **Standing project instruction**: after a requested code change is completed,
+  package, replace the old canonical app, install, and launch the new build.
+  Archive the previous known-good formal artifact for rollback and delete
+  disposable Debug/test app bundles. This standing instruction does not permit
+  deleting user data, unknown app copies, or unrelated startup items.
+
+### Required pre/post-install evidence
+
+Before replacement, inventory matching QuotaPulse processes, normal install
+locations, project-owned startup items, installed version/build, signature, and
+the rollback artifact. After installation verify:
+
+- `/Applications/QuotaPulse.app` has the intended Bundle ID and version/build;
+- the main app and widget versions/builds agree;
+- signing Team ID and designated requirement are stable;
+- exactly the expected QuotaPulse process maps to the canonical executable;
+- the project-owned startup item, if enabled, points to the canonical app;
+- existing accounts, credentials, cached data, and history remain readable; and
+- no DerivedData/test app is running or registered for startup.
+
+Do not identify the target through the display name alone. Unknown copies are
+reported and left untouched until authorized.
+
 ## Project Overview
 
-**API Usage Tracker for Mac** is a macOS menu bar application that tracks API usage quotas from various AI providers (MiniMax, GLM/智谱AI, Tavily). It provides both a menu bar interface and desktop widgets for monitoring remaining credits, usage, and plan limits.
+**QuotaPulse** is a macOS menu bar application that tracks balances and quota
+windows from supported AI/API providers. It provides a menu bar dashboard,
+pinned menu bar values, settings, notifications, and a widget target.
 
 - **Bundle ID**: `com.mactools.apiusagetracker`
 - **App Group**: `group.com.mactools.apiusagetracker`
@@ -15,7 +73,7 @@
 ```
 MacUsageTracker/
 ├── project.yml                  # XcodeGen project configuration
-├── VERSION                      # Version file (VERSION=1.0.10, BUILD=11)
+├── VERSION                      # Authoritative marketing version and build
 ├── README.md                    # User documentation (English/Chinese)
 ├── Sources/
 │   ├── App/                     # Main application target
@@ -80,7 +138,9 @@ hdiutil create -srcfolder "$APP_PATH" -volname "ApiUsageTrackerForMac" -fs HFS+ 
 
 - **App Target**: `ApiUsageTrackerForMac` (type: application)
 - **Widget Target**: `UsageWidget` (type: app-extension)
-- **Code Signing**: Manual (CODE_SIGN_IDENTITY: "-", CODE_SIGNING_ALLOWED: NO for local development)
+- **Code Signing**: unsigned/ad-hoc for isolated development builds; formal
+  local packages are signed by `build-secure-local-release.sh` with a stable
+  identity and identity-drift checks.
 - **Sandbox**: Enabled with network client and app group capabilities
 
 ## Architecture Details
@@ -123,9 +183,12 @@ SettingsView → AppViewModel → Storage (UserDefaults)
 
 | Provider | Endpoint Pattern | Features |
 |----------|-----------------|----------|
-| **MiniMax** | `minimaxi.com`, `minimax.chat` | Auto-detects Coding Plan vs Pay-As-You-Go |
-| **GLM (智谱AI)** | `open.bigmodel.cn`, `api.z.ai` | Auto-detects platform by API key format |
-| **Tavily** | `api.tavily.com` | Credit-based quota tracking |
+| **MiniMax** | Official MiniMax endpoints | Coding Plan / supported quota data |
+| **Tavily** | Official Tavily endpoint | Credit quota tracking |
+| **OpenAI API** | Official OpenAI organization usage/cost endpoints | API usage/cost tracking |
+| **Kimi** | Official Moonshot balance endpoints | Balance tracking |
+| **DeepSeek** | Official DeepSeek balance endpoint | Currency balance and local daily trend |
+| **Codex** | Local Codex account/session data | Quota windows and conservative API-equivalent value |
 
 ## Code Style Guidelines
 
@@ -180,8 +243,12 @@ HotkeySetting: Struct // keyCode, modifiers
 ### Storage
 
 - **App Group**: `group.com.mactools.apiusagetracker`
-- **Keys**: `usageData`, `appSettings`
-- **Format**: JSON-encoded via `JSONEncoder/Decoder`
+- **Non-secret state**: App Group UserDefaults, JSON-encoded where applicable.
+- **API keys/credentials**: Keychain through `KeychainManager`; never describe
+  them as plain UserDefaults storage.
+- Persistent suite names, keys, Keychain service/account/access group, and
+  migration markers are compatibility contracts. Changes require the global
+  L3 migration workflow.
 
 ## Development Notes
 
@@ -206,18 +273,28 @@ HotkeySetting: Struct // keyCode, modifiers
 - Progress bars for visual usage indication
 - "K" suffix for numbers >= 1000 (e.g., "1.5K")
 
-## Testing
+## Verification Strategy
 
-Currently, this project does not have automated tests. Testing is done manually:
+Use the global risk-based, minimal-sufficient workflow. This is a personal
+utility; do not grow or run a broad suite by default.
 
-1. Build and run the app in Xcode
-2. Configure API accounts in Settings
-3. Verify data fetching and display
-4. Test widget updates
+- Pure UI/layout/text changes: build and inspect the canonical installed app;
+  do not add automated tests by default.
+- Local logic changes: run at most one directly relevant test case/target, then
+  inspect the real installed behavior.
+- Shared core changes: run only the related test group unless broad impact is
+  demonstrated.
+- Keychain, persistence, signing, login items, install/update, cleanup, and
+  release changes: use targeted backups, identity/readback/rollback checks;
+  high risk does not imply a general full suite.
+- Tests must use isolated state and must not register the test app, access real
+  credentials, or write production App Group data.
+- The user's use of the canonical installed build is the primary acceptance
+  test for visual quality, interaction, wording, and workflow semantics.
 
 ## Security Considerations
 
-- API keys stored in UserDefaults (not Keychain - consider improvement)
+- API keys are stored in Keychain through `KeychainManager`.
 - App Sandbox enabled with minimal entitlements
 - Network client capability required for API calls
 - No hardcoded API keys in source code
@@ -229,12 +306,18 @@ Currently, this project does not have automated tests. Testing is done manually:
 
 ## Deployment
 
-1. Update `VERSION` file
-2. Update `README.md` changelog
-3. Generate project: `xcodegen generate`
-4. Build release: `xcodebuild -configuration Release`
-5. Create DMG for distribution
-6. Tag release in git
+1. Update the authoritative `VERSION` and monotonic `BUILD`; make `project.yml`
+   match and regenerate the Xcode project.
+2. Commit the intended source state before a formal publication build.
+3. Use `scripts/build-secure-local-release.sh`; do not invent a second package
+   path or sign with a drifting identity.
+4. For the standing local-install workflow, use `INSTALL=1` so the canonical
+   app is replaced and relaunched, then perform the identity/data postflight.
+5. Archive the previous known-good artifact and remove disposable Debug apps;
+   never clean user data as part of artifact cleanup.
+6. For GitHub publication, tag the exact source commit and upload the already
+   verified artifact. Record its SHA-256 and verify the remote attachment before
+   reporting the release.
 
 ## Dependencies
 
