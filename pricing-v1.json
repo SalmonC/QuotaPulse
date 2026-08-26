@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "effectiveDate": "2026-08-26",
+  "sourceURL": "https://developers.openai.com/api/docs/pricing/",
+  "currency": "USD",
+  "unitTokens": 1000000,
+  "models": {
+    "gpt-5.3-codex": {
+      "short": { "input": 1.75, "cachedInput": 0.175, "cacheWrite": 1.75, "output": 14.0 },
+      "expectsCacheWriteTelemetry": false
+    },
+    "gpt-5.4": {
+      "short": { "input": 2.5, "cachedInput": 0.25, "cacheWrite": 2.5, "output": 15.0 },
+      "long": { "input": 5.0, "cachedInput": 0.5, "cacheWrite": 5.0, "output": 22.5 },
+      "longContextThreshold": 272000,
+      "expectsCacheWriteTelemetry": false
+    },
+    "gpt-5.4-mini": {
+      "short": { "input": 0.75, "cachedInput": 0.075, "cacheWrite": 0.75, "output": 4.5 },
+      "expectsCacheWriteTelemetry": false
+    },
+    "gpt-5.5": {
+      "short": { "input": 5.0, "cachedInput": 0.5, "cacheWrite": 5.0, "output": 30.0 },
+      "long": { "input": 10.0, "cachedInput": 1.0, "cacheWrite": 10.0, "output": 45.0 },
+      "longContextThreshold": 272000,
+      "expectsCacheWriteTelemetry": false
+    },
+    "gpt-5.6-sol": {
+      "short": { "input": 4.0, "cachedInput": 0.4, "cacheWrite": 5.0, "output": 20.0 },
+      "long": { "input": 8.0, "cachedInput": 0.8, "cacheWrite": 10.0, "output": 30.0 },
+      "longContextThreshold": 272000,
+      "expectsCacheWriteTelemetry": true
+    },
+    "gpt-5.6-terra": {
+      "short": { "input": 2.0, "cachedInput": 0.2, "cacheWrite": 2.5, "output": 12.0 },
+      "long": { "input": 4.0, "cachedInput": 0.4, "cacheWrite": 5.0, "output": 18.0 },
+      "longContextThreshold": 272000,
+      "expectsCacheWriteTelemetry": true
+    },
+    "gpt-5.6-luna": {
+      "short": { "input": 0.2, "cachedInput": 0.02, "cacheWrite": 0.25, "output": 1.2 },
+      "long": { "input": 0.4, "cachedInput": 0.04, "cacheWrite": 0.5, "output": 1.8 },
+      "longContextThreshold": 272000,
+      "expectsCacheWriteTelemetry": true
+    }
+  }
+}
