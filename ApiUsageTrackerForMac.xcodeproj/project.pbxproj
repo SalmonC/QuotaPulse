@@ -11,6 +11,7 @@
 		13F488C052886E1CECA919C8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 14F415E3ABAE6B0B1C239C1B /* Assets.xcassets */; };
 		226BA8872B4FD19FF834B1FA /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 2E8282225F9008D9991A690F /* Sparkle */; };
 		22A6E906D0306C61FA343D3D /* UsageDataSorting.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0CAC7C62436639BBD0B16F5 /* UsageDataSorting.swift */; };
+		235E7E36E2C8ED64AA2795A3 /* CodexPricingCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64A97AFBFBF0BA9F11F07253 /* CodexPricingCatalog.swift */; };
 		28C826CE0E50865749DF28C2 /* SharedModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9414C803D917A736D233CFB1 /* SharedModels.swift */; };
 		30D02AA389725B8973EBE0AE /* UsageDataSorting.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0CAC7C62436639BBD0B16F5 /* UsageDataSorting.swift */; };
 		320BDB51592A7885254A88C0 /* CodexEquivalentValueIndexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01E5C4D4BA969FABD3472107 /* CodexEquivalentValueIndexer.swift */; };
@@ -32,6 +33,7 @@
 		BAFDF737F3AA15CB4135459F /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5778A959BCC4A1A91986E98 /* MainView.swift */; };
 		BD0C01256AD90323EA278935 /* MacUsageTrackerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8892B5835F6801D9232A56D4 /* MacUsageTrackerApp.swift */; };
 		C155C92883D10BFF2E0B2832 /* UpdateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 970286AFB63BF1D74B394556 /* UpdateService.swift */; };
+		C6D260D7965A97EB51BF54A7 /* CodexPricingCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64A97AFBFBF0BA9F11F07253 /* CodexPricingCatalog.swift */; };
 		C963FBE0C3CCF6E83069F97D /* UsageMetricsLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = D15B8BEB8D28C099C0F1FB12 /* UsageMetricsLogic.swift */; };
 		D56EB8F3911C7166AC6F678D /* KeychainPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0C6955B4263AE56DDE8FE43 /* KeychainPolicyTests.swift */; };
 		D8968224395A6FC809510369 /* CodexServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A251B17913629DA70F7514A2 /* CodexServiceTests.swift */; };
@@ -62,6 +64,7 @@
 		58EAE0BD066387C4565E4BBE /* ProviderAccountTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderAccountTests.swift; sourceTree = "<group>"; };
 		602F70D65A9C980203F6BD98 /* KeychainManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainManager.swift; sourceTree = "<group>"; };
 		6211BC542870A74D68E8BB96 /* UpdateServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateServiceTests.swift; sourceTree = "<group>"; };
+		64A97AFBFBF0BA9F11F07253 /* CodexPricingCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexPricingCatalog.swift; sourceTree = "<group>"; };
 		7BE95869E66771C1F8B0936E /* QuotaPulseTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = QuotaPulseTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		7D6532CAF38E297497E0634B /* CodexEquivalentValueIndexerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexEquivalentValueIndexerTests.swift; sourceTree = "<group>"; };
 		8892B5835F6801D9232A56D4 /* MacUsageTrackerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacUsageTrackerApp.swift; sourceTree = "<group>"; };
@@ -189,6 +192,7 @@
 			isa = PBXGroup;
 			children = (
 				01E5C4D4BA969FABD3472107 /* CodexEquivalentValueIndexer.swift */,
+				64A97AFBFBF0BA9F11F07253 /* CodexPricingCatalog.swift */,
 				1FF6B9FE16DDE191C927E55A /* MiniMaxService.swift */,
 			);
 			path = Services;
@@ -350,6 +354,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				320BDB51592A7885254A88C0 /* CodexEquivalentValueIndexer.swift in Sources */,
+				C6D260D7965A97EB51BF54A7 /* CodexPricingCatalog.swift in Sources */,
 				00F9B57E8B54F79C613BE58D /* KeychainManager.swift in Sources */,
 				53150102108CF99497BA4546 /* MiniMaxService.swift in Sources */,
 				89011B2F5304B3212CB3EFDA /* QuotaPulseMark.swift in Sources */,
@@ -365,6 +370,7 @@
 			files = (
 				ABFE3EF76BFB7A52C5311058 /* AppViewModel.swift in Sources */,
 				5FC686DCC2A6F7E912902909 /* CodexEquivalentValueIndexer.swift in Sources */,
+				235E7E36E2C8ED64AA2795A3 /* CodexPricingCatalog.swift in Sources */,
 				B57F915ED5C7D636FF216929 /* KeychainManager.swift in Sources */,
 				BD0C01256AD90323EA278935 /* MacUsageTrackerApp.swift in Sources */,
 				BAFDF737F3AA15CB4135459F /* MainView.swift in Sources */,
@@ -438,7 +444,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 37;
+				CURRENT_PROJECT_VERSION = 38;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -452,7 +458,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0.13;
+				MARKETING_VERSION = 1.0.14;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -605,7 +611,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 37;
+				CURRENT_PROJECT_VERSION = 38;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -625,7 +631,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0.13;
+				MARKETING_VERSION = 1.0.14;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;

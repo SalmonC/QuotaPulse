@@ -26,6 +26,7 @@ struct SettingsView: View {
     @State private var showTrendInDashboard: Bool = true
     @State private var showCodexEquivalentValue: Bool = true
     @State private var codexEquivalentValueWindow: TrendWindow = .week
+    @State private var isRefreshingCodexPricing = false
     @State private var dashboardSortMode: DashboardSortMode = .manual
     @State private var dashboardTrendWindow: TrendWindow = .week
     @State private var launchAtLogin: Bool = false
@@ -512,11 +513,7 @@ struct SettingsView: View {
                                     }
                                     .padding(.leading, 18)
 
-                                    Text(language == .english
-                                         ? "USD prices as of \(CodexEquivalentValuePricing.referenceDate). Requires an enabled Codex account."
-                                         : "美元价格基准：\(CodexEquivalentValuePricing.referenceDate)。需要启用 Codex 账号。")
-                                        .font(.caption2)
-                                        .foregroundColor(.secondary)
+                                    codexPricingStatusView
                                         .padding(.leading, 18)
                                 }
                             }
@@ -795,6 +792,81 @@ struct SettingsView: View {
         )
     }
     
+    private var codexPricingStatusView: some View {
+        let status = viewModel.codexEquivalentValueSnapshot.pricingStatus
+        return VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 8) {
+                Text(language == .english ? "Price source" : "价格来源")
+                    .foregroundColor(.secondary)
+                if let sourceURL = URL(string: status.sourceURL) {
+                    Link(language == .english ? "OpenAI official pricing" : "OpenAI 官方价格", destination: sourceURL)
+                } else {
+                    Text(language == .english ? "Built-in pricing" : "内置价格")
+                }
+                Spacer(minLength: 8)
+                Text(status.isUsingRemote
+                     ? (language == .english ? "Remote catalog" : "远程价格表")
+                     : (language == .english ? "Built-in fallback" : "内置兜底"))
+                    .font(.caption2.weight(.medium))
+                    .foregroundColor(status.isUsingRemote ? .green : .orange)
+            }
+
+            HStack(spacing: 16) {
+                Text(language == .english
+                     ? "Price date: \(status.effectiveDate)"
+                     : "价格日期：\(status.effectiveDate)")
+                Text(language == .english
+                     ? "Last checked: \(pricingCheckTime(status.lastCheckedAt))"
+                     : "上次检查：\(pricingCheckTime(status.lastCheckedAt))")
+            }
+            .font(.caption2)
+            .foregroundColor(.secondary)
+
+            if let error = status.errorMessage, !error.isEmpty {
+                Text(language == .english
+                     ? "Update failed; continuing with the last valid prices."
+                     : "价格更新失败，继续使用上一次有效价格。\(error)")
+                    .font(.caption2)
+                    .foregroundColor(.orange)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            HStack(spacing: 10) {
+                Button {
+                    guard !isRefreshingCodexPricing else { return }
+                    isRefreshingCodexPricing = true
+                    Task {
+                        await viewModel.refreshCodexPricing()
+                        isRefreshingCodexPricing = false
+                    }
+                } label: {
+                    HStack(spacing: 5) {
+                        if isRefreshingCodexPricing {
+                            ProgressView().controlSize(.small)
+                        } else {
+                            Image(systemName: "arrow.clockwise")
+                        }
+                        Text(language == .english ? "Check prices now" : "立即检查价格")
+                    }
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+                .disabled(isRefreshingCodexPricing)
+
+                Text(language == .english
+                     ? "Automatically checked at most once per day. Historical values use the latest prices."
+                     : "每天最多自动检查一次；历史用量始终按最新价格重算。")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+        }
+    }
+
+    private func pricingCheckTime(_ date: Date?) -> String {
+        guard let date else { return language == .english ? "Not yet" : "尚未检查" }
+        return date.formatted(date: .abbreviated, time: .shortened)
+    }
+
     private func loadSettings() {
         // Reuse the in-memory settings from the shared view model to avoid an extra
         // Keychain read prompt every time the settings window is opened.

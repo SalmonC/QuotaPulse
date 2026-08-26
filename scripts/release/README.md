@@ -59,3 +59,19 @@ Recommended order:
 2. Upload `.zip` + `.dmg`.
 3. Publish `appcast.xml` to Pages.
 4. Click in-app "Check for Updates" for validation.
+
+## Publish the Codex pricing catalog
+
+QuotaPulse checks a small validated catalog on GitHub Pages at most once per
+day. After updating `Config/codex-pricing-v1.json` from the official OpenAI
+pricing page, publish it with:
+
+```bash
+SOURCE_PATH="Config/codex-pricing-v1.json" \
+TARGET_NAME="pricing-v1.json" \
+COMMIT_MESSAGE="chore(pricing): update Codex API prices" \
+./scripts/release/publish-pages.sh
+```
+
+The app keeps the last valid catalog and falls back to built-in prices when the
+remote document is unavailable or fails validation.

@@ -13,6 +13,7 @@ struct CodexEquivalentValueSnapshot: Equatable {
     var excludedUnverifiedRequestCount = 0
     var lastScannedAt: Date?
     var errorMessage: String?
+    var pricingStatus: CodexPricingStatus = .builtIn
 
     static let empty = CodexEquivalentValueSnapshot()
 
@@ -76,28 +77,8 @@ private struct CodexValueIndex: Codable {
     var lastScannedAt: Date?
 }
 
-private struct CodexModelPrice {
-    let input: Double
-    let cachedInput: Double
-    let output: Double
-    let supportsCacheWritePricing: Bool
-    let usesLongContextPricing: Bool
-}
-
 enum CodexEquivalentValuePricing {
-    static let referenceDate = "2026-08-14"
-    static let longContextThreshold: Int64 = 272_000
-
-    // USD per 1M text tokens. Sources are the official OpenAI model pages.
-    private static let prices: [String: CodexModelPrice] = [
-        "gpt-5.3-codex": .init(input: 1.75, cachedInput: 0.175, output: 14, supportsCacheWritePricing: false, usesLongContextPricing: false),
-        "gpt-5.4": .init(input: 2.50, cachedInput: 0.25, output: 15, supportsCacheWritePricing: false, usesLongContextPricing: true),
-        "gpt-5.4-mini": .init(input: 0.75, cachedInput: 0.075, output: 4.50, supportsCacheWritePricing: false, usesLongContextPricing: false),
-        "gpt-5.5": .init(input: 5, cachedInput: 0.50, output: 30, supportsCacheWritePricing: false, usesLongContextPricing: true),
-        "gpt-5.6-sol": .init(input: 5, cachedInput: 0.50, output: 30, supportsCacheWritePricing: true, usesLongContextPricing: true),
-        "gpt-5.6-terra": .init(input: 2, cachedInput: 0.20, output: 12, supportsCacheWritePricing: true, usesLongContextPricing: true),
-        "gpt-5.6-luna": .init(input: 0.20, cachedInput: 0.02, output: 1.20, supportsCacheWritePricing: true, usesLongContextPricing: true)
-    ]
+    static var referenceDate: String { CodexPricingDocument.builtIn.effectiveDate }
 
     static func normalizedModel(_ raw: String?) -> String? {
         guard let raw else { return nil }
@@ -108,29 +89,35 @@ enum CodexEquivalentValuePricing {
 
     static func hasPrice(for model: String?) -> Bool {
         guard let model = normalizedModel(model) else { return false }
-        return prices[model] != nil
+        return CodexPricingDocument.builtIn.models[model] != nil
     }
 
-    private static func calculatedValueUSD(model: String?, usage: CodexTokenUsage) -> Double? {
-        guard let model = normalizedModel(model), let price = prices[model] else { return nil }
+    private static func calculatedValueUSD(
+        model: String?,
+        usage: CodexTokenUsage,
+        pricing: CodexPricingDocument
+    ) -> Double? {
+        guard let model = normalizedModel(model), let modelPrice = pricing.models[model] else { return nil }
+        let price = modelPrice.tier(inputTokens: usage.input)
         let cached = min(max(usage.cachedInput, 0), max(usage.input, 0))
         let writes = min(max(usage.cacheWriteInput, 0), max(usage.input - cached, 0))
         let ordinary = max(usage.input - cached - writes, 0)
-        let longInputMultiplier = price.usesLongContextPricing && usage.input > longContextThreshold ? 2.0 : 1.0
-        let outputMultiplier = price.usesLongContextPricing && usage.input > longContextThreshold ? 1.5 : 1.0
         let inputValue = Double(ordinary) * price.input
         let cachedValue = Double(cached) * price.cachedInput
-        let writeRate = price.supportsCacheWritePricing ? price.input * 1.25 : price.input
-        let writeValue = Double(writes) * writeRate
+        let writeValue = Double(writes) * price.cacheWrite
         let outputValue = Double(max(usage.output, 0)) * price.output
-        return ((inputValue + cachedValue + writeValue) * longInputMultiplier + outputValue * outputMultiplier) / 1_000_000
+        return (inputValue + cachedValue + writeValue + outputValue) / Double(pricing.unitTokens)
     }
 
-    private static func cacheWriteMayBeMissing(model: String?, usage: CodexTokenUsage) -> Bool {
-        guard let model = normalizedModel(model), let price = prices[model] else { return false }
+    private static func cacheWriteMayBeMissing(
+        model: String?,
+        usage: CodexTokenUsage,
+        pricing: CodexPricingDocument
+    ) -> Bool {
+        guard let model = normalizedModel(model), let price = pricing.models[model] else { return false }
         // Codex has emitted an explicit zero even when the subscription backend did
         // not expose cache-write telemetry, so zero cannot be treated as proof.
-        return price.supportsCacheWritePricing
+        return price.expectsCacheWriteTelemetry
             && (!usage.cacheWriteWasReported || usage.cacheWriteInput == 0)
     }
 
@@ -150,36 +137,49 @@ enum CodexEquivalentValuePricing {
                 cacheWriteInput: cacheWriteInput,
                 output: output,
                 cacheWriteWasReported: cacheWriteWasReported
-            )
+            ),
+            pricing: .builtIn
         )
     }
 
-    fileprivate static func valueUSD(model: String?, usage: CodexTokenUsage) -> Double? {
-        calculatedValueUSD(model: model, usage: usage)
+    fileprivate static func valueUSD(
+        model: String?,
+        usage: CodexTokenUsage,
+        pricing: CodexPricingDocument
+    ) -> Double? {
+        calculatedValueUSD(model: model, usage: usage, pricing: pricing)
     }
 
-    fileprivate static func mayBeLowerBound(model: String?, usage: CodexTokenUsage) -> Bool {
-        cacheWriteMayBeMissing(model: model, usage: usage)
+    fileprivate static func mayBeLowerBound(
+        model: String?,
+        usage: CodexTokenUsage,
+        pricing: CodexPricingDocument
+    ) -> Bool {
+        cacheWriteMayBeMissing(model: model, usage: usage, pricing: pricing)
     }
 }
 
 actor CodexEquivalentValueIndexer {
-    static let shared = CodexEquivalentValueIndexer()
+    static let shared = CodexEquivalentValueIndexer(pricingStore: .shared)
 
     private let fileManager: FileManager
     private let roots: [URL]
     private let cacheURL: URL
+    private let pricingStore: CodexPricingStore?
     private let retentionDays = 45
     private var index: CodexValueIndex
     private var lastRefreshStartedAt: Date?
     private var lastSnapshot: CodexEquivalentValueSnapshot = .empty
+    private var pricingState: CodexPricingState = .builtIn
 
     init(
         fileManager: FileManager = .default,
         roots: [URL]? = nil,
-        cacheURL: URL? = nil
+        cacheURL: URL? = nil,
+        pricingStore: CodexPricingStore? = nil
     ) {
         self.fileManager = fileManager
+        self.pricingStore = pricingStore
         let home = fileManager.homeDirectoryForCurrentUser
         self.roots = roots ?? [
             home.appendingPathComponent(".codex/sessions", isDirectory: true),
@@ -199,6 +199,7 @@ actor CodexEquivalentValueIndexer {
     }
 
     func refresh(now: Date = Date(), minimumInterval: TimeInterval = 60) async -> CodexEquivalentValueSnapshot {
+        await updatePricing(now: now, force: false)
         if let lastRefreshStartedAt,
            now.timeIntervalSince(lastRefreshStartedAt) < minimumInterval,
            lastSnapshot.lastScannedAt != nil {
@@ -232,6 +233,22 @@ actor CodexEquivalentValueIndexer {
             lastSnapshot = makeSnapshot(now: now)
         }
         return lastSnapshot
+    }
+
+    func refreshPricing(now: Date = Date()) async -> CodexEquivalentValueSnapshot {
+        await updatePricing(now: now, force: true)
+        lastSnapshot = makeSnapshot(now: now)
+        return lastSnapshot
+    }
+
+    private func updatePricing(now: Date, force: Bool) async {
+        guard let pricingStore else { return }
+        let next = await pricingStore.refreshIfNeeded(now: now, force: force)
+        guard next != pricingState else { return }
+        pricingState = next
+        if lastSnapshot.lastScannedAt != nil {
+            lastSnapshot = makeSnapshot(now: now)
+        }
     }
 
     private func discoverLogFiles() -> [String: URL] {
@@ -504,12 +521,20 @@ actor CodexEquivalentValueIndexer {
                 if record.planType?.lowercased() != "free" { unverified += 1 }
                 continue
             }
-            guard let value = CodexEquivalentValuePricing.valueUSD(model: record.model, usage: record.usage) else {
+            guard let value = CodexEquivalentValuePricing.valueUSD(
+                model: record.model,
+                usage: record.usage,
+                pricing: pricingState.document
+            ) else {
                 unsupported.insert(record.model ?? "unknown")
                 lowerBound = true
                 continue
             }
-            if CodexEquivalentValuePricing.mayBeLowerBound(model: record.model, usage: record.usage) {
+            if CodexEquivalentValuePricing.mayBeLowerBound(
+                model: record.model,
+                usage: record.usage,
+                pricing: pricingState.document
+            ) {
                 lowerBound = true
             }
             valuesByDay[calendar.startOfDay(for: record.timestamp), default: 0] += value
@@ -522,7 +547,8 @@ actor CodexEquivalentValueIndexer {
             unsupportedModels: unsupported.sorted(),
             excludedUnverifiedRequestCount: unverified,
             lastScannedAt: index.lastScannedAt,
-            errorMessage: nil
+            errorMessage: nil,
+            pricingStatus: pricingState.status
         )
     }
 

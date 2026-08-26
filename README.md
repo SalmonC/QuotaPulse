@@ -50,7 +50,7 @@ A macOS menu bar application for tracking API usage quotas from various AI provi
 - **Usage Progress** - Visual progress bars showing usage percentage
 - **DeepSeek Balance Trend** - Optional daily balance trend based on the last query of each day
 - **Codex Reset Time** - Shows the next reset time point for 5-hour and weekly quota windows
-- **Codex API Equivalent Value** - Shows verified paid Coding Plan text usage as a 3/7/14/30-day USD value chart using current official API prices; token details remain hidden
+- **Codex API Equivalent Value** - Shows verified paid Coding Plan text usage as a 3/7/14/30-day USD value chart using current official API prices; prices update daily from a validated remote catalog with cached and built-in fallback, while token details remain hidden
 - **Color-coded Status** - Green/Orange/Red based on usage level
 - **Error Handling** - Clear error messages with retry options
 
@@ -190,7 +190,7 @@ Optional environment variables:
 - **可折叠仪表盘** - 展开/折叠账户查看详情
 - **DeepSeek 余额趋势** - 可选展示每日余额趋势，每天采用当天最后一次查询结果
 - **Codex 刷新时间点** - 5 小时额度与周额度展示下一次刷新的具体时间点
-- **Codex API 等价价值** - 将可核验的付费 Coding Plan 文本用量按当前官方 API 美元单价折算，支持 3/7/14/30 天按日图表，且不展示 Token 明细
+- **Codex API 等价价值** - 将可核验的付费 Coding Plan 文本用量按当前官方 API 美元单价折算，支持 3/7/14/30 天按日图表；价格每日自动检查，并提供缓存和内置兜底，且不展示 Token 明细
 - **用量进度条** - 可视化显示用量百分比
 - **颜色编码状态** - 根据用量级别显示绿/橙/红色
 - **错误处理** - 清晰的错误信息和重试选项

@@ -12,7 +12,7 @@ final class CodexEquivalentValueIndexerTests: XCTestCase {
                 output: 10_000
             )
         )
-        XCTAssertEqual(value, 2.675, accuracy: 0.000_001)
+        XCTAssertEqual(value, 2.08, accuracy: 0.000_001)
     }
 
     func testSkipsForkReplayAndRepeatedTokenBroadcasts() async throws {

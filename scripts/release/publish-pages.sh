@@ -3,13 +3,14 @@
 set -euo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-APPCAST_PATH="${APPCAST_PATH:-$PROJECT_ROOT/Artifacts/release/appcast.xml}"
+SOURCE_PATH="${SOURCE_PATH:-${APPCAST_PATH:-$PROJECT_ROOT/Artifacts/release/appcast.xml}}"
+TARGET_NAME="${TARGET_NAME:-appcast.xml}"
 PAGES_BRANCH="${PAGES_BRANCH:-gh-pages}"
 PAGES_SUBDIR="${PAGES_SUBDIR:-.}"
 COMMIT_MESSAGE="${COMMIT_MESSAGE:-chore(release): update appcast}"
 
-if [[ ! -f "$APPCAST_PATH" ]]; then
-  echo "Appcast not found: $APPCAST_PATH" >&2
+if [[ ! -f "$SOURCE_PATH" ]]; then
+  echo "Pages source not found: $SOURCE_PATH" >&2
   exit 1
 fi
 
@@ -30,13 +31,13 @@ git -C "$PROJECT_ROOT" worktree add "$WORKTREE_DIR" "$PAGES_BRANCH"
 
 TARGET_DIR="$WORKTREE_DIR/$PAGES_SUBDIR"
 mkdir -p "$TARGET_DIR"
-cp "$APPCAST_PATH" "$TARGET_DIR/appcast.xml"
+cp "$SOURCE_PATH" "$TARGET_DIR/$TARGET_NAME"
 
 if [[ -n "$(git -C "$WORKTREE_DIR" status --porcelain)" ]]; then
-  git -C "$WORKTREE_DIR" add "$TARGET_DIR/appcast.xml"
+  git -C "$WORKTREE_DIR" add "$TARGET_DIR/$TARGET_NAME"
   git -C "$WORKTREE_DIR" commit -m "$COMMIT_MESSAGE"
   git -C "$WORKTREE_DIR" push origin "$PAGES_BRANCH"
-  echo "[pages] Published appcast.xml to $PAGES_BRANCH/$PAGES_SUBDIR"
+  echo "[pages] Published $TARGET_NAME to $PAGES_BRANCH/$PAGES_SUBDIR"
 else
-  echo "[pages] No appcast changes to publish."
+  echo "[pages] No $TARGET_NAME changes to publish."
 fi

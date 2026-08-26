@@ -227,6 +227,10 @@ final class AppViewModel: ObservableObject {
             codexEquivalentValueSnapshot = snapshot
         }
     }
+
+    func refreshCodexPricing() async {
+        codexEquivalentValueSnapshot = await CodexEquivalentValueIndexer.shared.refreshPricing()
+    }
     
     func saveSettings(_ newSettings: AppSettings) throws {
         var persistedSettings = newSettings
