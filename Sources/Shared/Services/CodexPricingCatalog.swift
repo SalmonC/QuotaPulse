@@ -190,7 +190,7 @@ actor CodexPricingStore {
     init(
         fileManager: FileManager = .default,
         cacheURL: URL? = nil,
-        remoteURL: URL? = URL(string: "https://salmonc.github.io/ApiUsageTrackerForMac/pricing-v1.json"),
+        remoteURL: URL? = URL(string: "https://salmonc.github.io/QuotaPulse/pricing-v1.json"),
         checkInterval: TimeInterval = 24 * 60 * 60
     ) {
         self.fileManager = fileManager

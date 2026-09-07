@@ -27,7 +27,7 @@
     <key>LSUIElement</key>
     <true/>
     <key>SUFeedURL</key>
-    <string>https://salmonc.github.io/ApiUsageTrackerForMac/appcast.xml</string>
+    <string>https://salmonc.github.io/QuotaPulse/appcast.xml</string>
     <key>SUPublicEDKey</key>
     <string>MDhYHxX1XsxNL8dVMZn6jHIzpvZDsQ+0tFry9LEVLUU=</string>
     <key>SUEnableAutomaticChecks</key>

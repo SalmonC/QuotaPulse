@@ -47,13 +47,13 @@ final class UpdateService: ObservableObject {
     private let currentVersionProvider: () -> String
 
     init(
-        readmeURL: URL = URL(string: "https://github.com/SalmonC/ApiUsageTrackerForMac/blob/main/README.md")!,
+        readmeURL: URL = URL(string: "https://github.com/SalmonC/QuotaPulse/blob/main/README.md")!,
         languageProvider: @escaping () -> AppLanguage = { .chinese },
         urlOpener: @escaping (URL) -> Bool = { NSWorkspace.shared.open($0) },
         latestReleaseProvider: @escaping () async throws -> GitHubRelease? = {
             try await UpdateService.fetchLatestStableRelease(
                 owner: "SalmonC",
-                repo: "ApiUsageTrackerForMac"
+                repo: "QuotaPulse"
             )
         },
         currentVersionProvider: @escaping () -> String = {

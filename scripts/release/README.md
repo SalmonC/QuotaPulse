@@ -11,6 +11,7 @@ This directory contains release helpers for Sparkle-based in-app updates.
    - Developer ID Application certificate
    - Notarytool keychain profile
    - Sparkle private EdDSA key file
+   - GitHub CLI (`gh`) authenticated to publish the compatibility feed
 3. `generate_appcast` is installed or built from Sparkle.
 
 ## 1) Build, Sign, Notarize, Package
@@ -29,7 +30,7 @@ Outputs in `Artifacts/release/`:
 
 ```bash
 SPARKLE_PRIVATE_KEY_PATH="/path/to/eddsa_private_key" \
-DOWNLOAD_URL_PREFIX="https://github.com/SalmonC/ApiUsageTrackerForMac/releases/download/vX.Y.Z" \
+DOWNLOAD_URL_PREFIX="https://github.com/SalmonC/QuotaPulse/releases/download/vX.Y.Z" \
 ./scripts/release/generate-appcast.sh
 ```
 
@@ -49,6 +50,12 @@ PAGES_BRANCH="gh-pages" \
 PAGES_SUBDIR="." \
 ./scripts/release/publish-pages.sh
 ```
+
+The publishing script also mirrors `appcast.xml` to
+`SalmonC/salmonc.github.io/ApiUsageTrackerForMac/appcast.xml`. This preserves
+the pre-rename Sparkle feed URL for already-installed versions. Set
+`PUBLISH_LEGACY_APPCAST=0` only when intentionally retiring that compatibility
+path.
 
 ## 4) Publish GitHub Release
 

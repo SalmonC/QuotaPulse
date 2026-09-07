@@ -5,7 +5,7 @@ set -euo pipefail
 PROJECT_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 RELEASE_DIR="${RELEASE_DIR:-$PROJECT_ROOT/Artifacts/release}"
 APPCAST_PATH="${APPCAST_PATH:-$RELEASE_DIR/appcast.xml}"
-DOWNLOAD_URL_PREFIX="${DOWNLOAD_URL_PREFIX:-https://github.com/SalmonC/ApiUsageTrackerForMac/releases/download}"
+DOWNLOAD_URL_PREFIX="${DOWNLOAD_URL_PREFIX:-https://github.com/SalmonC/QuotaPulse/releases/download}"
 DEFAULT_SPARKLE_KEY_PATH="$HOME/.config/quotapulse/sparkle_private_key"
 SPARKLE_PRIVATE_KEY_PATH="${SPARKLE_PRIVATE_KEY_PATH:-$DEFAULT_SPARKLE_KEY_PATH}"
 GENERATE_APPCAST_BIN="${GENERATE_APPCAST_BIN:-}"

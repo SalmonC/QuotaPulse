@@ -1,11 +1,11 @@
-# API Usage Tracker for Mac
+# QuotaPulse — API Usage Tracker for Mac
 
 A macOS menu bar application for tracking API usage quotas from various AI providers. Monitor your remaining credits, usage, and plan limits directly from the menu bar or desktop widget.
 
 <p align="center">
   <img src="https://img.shields.io/badge/platform-macOS%2014.0+-blue" alt="Platform">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
-  <img src="https://img.shields.io/badge/version-1.0.13-blue" alt="Version">
+  <img src="https://img.shields.io/github/v/release/SalmonC/QuotaPulse?label=version&color=blue" alt="Version">
 </p>
 
 ---
@@ -61,7 +61,7 @@ A macOS menu bar application for tracking API usage quotas from various AI provi
 ### Installation
 
 #### From Release
-1. Download the latest `.dmg` from [Releases](https://github.com/SalmonC/ApiUsageTrackerForMac/releases)
+1. Download the latest `.dmg` from [Releases](https://github.com/SalmonC/QuotaPulse/releases)
 2. Open the `.dmg` file
 3. Drag `QuotaPulse.app` to Applications
 4. Launch the app
@@ -69,8 +69,8 @@ A macOS menu bar application for tracking API usage quotas from various AI provi
 #### From Source
 ```bash
 # Clone repository
-git clone https://github.com/SalmonC/ApiUsageTrackerForMac.git
-cd ApiUsageTrackerForMac
+git clone https://github.com/SalmonC/QuotaPulse.git
+cd QuotaPulse
 
 # Generate Xcode project
 xcodegen generate
@@ -104,7 +104,7 @@ required for normal public distribution without Gatekeeper warnings.
 
 This script will automatically:
 - build the app
-- package `API-Tracker-latest.dmg`
+- package `QuotaPulse-latest.dmg`
 - quit current running app instance
 - mount DMG and launch app from DMG
 - run startup/health/crash checks
@@ -202,7 +202,7 @@ Optional environment variables:
 ### 安装方法
 
 #### 从 Release 安装
-1. 从 [Releases](https://github.com/SalmonC/ApiUsageTrackerForMac/releases) 下载最新的 `.dmg` 文件
+1. 从 [Releases](https://github.com/SalmonC/QuotaPulse/releases) 下载最新的 `.dmg` 文件
 2. 打开 `.dmg` 文件
 3. 将 `QuotaPulse.app` 拖到应用程序文件夹
 4. 启动应用
@@ -210,8 +210,8 @@ Optional environment variables:
 #### 从源码编译
 ```bash
 # 克隆仓库
-git clone https://github.com/SalmonC/ApiUsageTrackerForMac.git
-cd ApiUsageTrackerForMac
+git clone https://github.com/SalmonC/QuotaPulse.git
+cd QuotaPulse
 
 # 生成 Xcode 项目
 xcodegen generate
@@ -244,7 +244,7 @@ INSTALL=1 ./scripts/build-secure-local-release.sh
 
 脚本会自动完成：
 - 编译应用
-- 打包 `API-Tracker-latest.dmg`
+- 打包 `QuotaPulse-latest.dmg`
 - 退出当前正在运行的应用
 - 挂载 DMG 并从 DMG 启动应用
 - 执行启动/健康度/崩溃检测

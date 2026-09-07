@@ -7,15 +7,15 @@
 - Product category: macOS menu bar API quota monitor
 - Primary mark: Q-shaped quota ring with a pulse line
 
-Use `QuotaPulse` in user-visible surfaces. Keep repository, project, scheme, bundle ID, and app group technical IDs stable unless a migration is explicitly planned.
+Use `QuotaPulse` in user-visible surfaces. Keep the Xcode project, scheme, bundle ID, and app group technical IDs stable unless a migration is explicitly planned.
 
 ## Stable technical IDs
 
-- Repository/project name: `ApiUsageTrackerForMac`
+- Repository name: `QuotaPulse`
+- Xcode project and scheme name: `ApiUsageTrackerForMac`
 - Main bundle ID: `com.mactools.apiusagetracker`
 - App group: `group.com.mactools.apiusagetracker`
 - Widget bundle ID: `com.mactools.apiusagetracker.widget`
-- Xcode scheme: `ApiUsageTrackerForMac`
 
 These IDs are intentionally not renamed by the brand refresh because they affect update feeds, existing user data, app group storage, and build automation.
 

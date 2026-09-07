@@ -30,7 +30,7 @@ final class UpdateServiceTests: XCTestCase {
             latestReleaseProvider: {
                 GitHubRelease(
                     tagName: "v0.9.3",
-                    htmlURL: URL(string: "https://github.com/SalmonC/ApiUsageTrackerForMac/releases/tag/v0.9.3")!,
+                    htmlURL: URL(string: "https://github.com/SalmonC/QuotaPulse/releases/tag/v0.9.3")!,
                     draft: false,
                     prerelease: false
                 )
@@ -55,7 +55,7 @@ final class UpdateServiceTests: XCTestCase {
             latestReleaseProvider: {
                 GitHubRelease(
                     tagName: "v0.9.4",
-                    htmlURL: URL(string: "https://github.com/SalmonC/ApiUsageTrackerForMac/releases/tag/v0.9.4")!,
+                    htmlURL: URL(string: "https://github.com/SalmonC/QuotaPulse/releases/tag/v0.9.4")!,
                     draft: false,
                     prerelease: false
                 )
@@ -65,7 +65,7 @@ final class UpdateServiceTests: XCTestCase {
 
         service.checkForUpdates()
         waitUntil { !service.isChecking }
-        XCTAssertEqual(openedURL?.absoluteString, "https://github.com/SalmonC/ApiUsageTrackerForMac/releases/tag/v0.9.4")
+        XCTAssertEqual(openedURL?.absoluteString, "https://github.com/SalmonC/QuotaPulse/releases/tag/v0.9.4")
         XCTAssertTrue((service.statusMessage ?? "").contains("已打开下载页面"))
     }
 
