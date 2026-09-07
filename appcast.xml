@@ -3,12 +3,12 @@
     <channel>
         <title>QuotaPulse</title>
         <item>
-            <title>1.0.13</title>
-            <pubDate>Wed, 26 Aug 2026 11:24:57 +0800</pubDate>
-            <sparkle:version>37</sparkle:version>
-            <sparkle:shortVersionString>1.0.13</sparkle:shortVersionString>
+            <title>1.0.14</title>
+            <pubDate>Mon, 07 Sep 2026 15:58:30 +0800</pubDate>
+            <sparkle:version>39</sparkle:version>
+            <sparkle:shortVersionString>1.0.14</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-            <enclosure url="https://github.com/SalmonC/QuotaPulse/releases/download/v1.0.13/QuotaPulse-1.0.13-build37.zip" length="3817437" type="application/octet-stream" sparkle:edSignature="3otL0xa9ZRrnsQbsnlIyBCNDwH74Kg3Pnlk1kSCRWsbovurogbvI9FTLrHvTmo6TaVpxCwj4AmevyJnCP4MEDQ=="/>
+            <enclosure url="https://github.com/SalmonC/QuotaPulse/releases/download/v1.0.14/QuotaPulse-1.0.14-build39.zip" length="3533607" type="application/octet-stream" sparkle:edSignature="7zbfmD+UDyLUQY1akw44JaitVD+44BYN8CfdSnKc1BL+M6Yr7/Zfs1pJqXi5MQMrEXq0uI0MsVwTGzeWs+KHBw=="/>
         </item>
     </channel>
 </rss>
