@@ -30,7 +30,7 @@ Outputs in `Artifacts/release/`:
 
 ```bash
 SPARKLE_PRIVATE_KEY_PATH="/path/to/eddsa_private_key" \
-DOWNLOAD_URL_PREFIX="https://github.com/SalmonC/QuotaPulse/releases/download/vX.Y.Z" \
+DOWNLOAD_URL_PREFIX="https://github.com/SalmonC/QuotaPulse/releases/download/vX.Y.Z/" \
 ./scripts/release/generate-appcast.sh
 ```
 
